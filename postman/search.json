@@ -37,10 +37,6 @@
                             "pm.test('Has pagination', () => {",
                             "    const json = pm.response.json();",
                             "    pm.expect(json.pagination).to.have.all.keys('page','limit','total','totalPages','hasNextPage','hasPrevPage');",
-                            "});",
-                            "pm.test('secret_detail never exposed', () => {",
-                            "    const json = pm.response.json();",
-                            "    json.data.forEach(d => pm.expect(d).to.not.have.property('secret_detail'));",
                             "});"
                         ]
                     }

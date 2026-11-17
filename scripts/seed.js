@@ -70,7 +70,6 @@ function generatePost() {
         lng: loc.lng + (Math.random() - 0.5) * 0.005,
         start,
         end,
-        secret_detail: "Détail secret de preuve de propriété.",
         status: pick(STATUSES),
         user: fakeObjectId()
     };

@@ -37,10 +37,6 @@ const postSchema = new mongoose.Schema(
         lng: { type: Number, default: null },
         start: { type: Date, default: null },
         end: { type: Date, default: null },
-        secret_detail: {
-            type: String,
-            select: false          // never returned by default
-        },
         status: {
             type: String,
             enum: Object.values(POST_STATUSES),
@@ -63,7 +59,7 @@ const postSchema = new mongoose.Schema(
 // Compound index for the most common filtered query path
 postSchema.index({ intent: 1, status: 1, category: 1, start: -1 });
 
-// Full-text search on title + description (excludes secret_detail)
+// Full-text search on title + description
 postSchema.index({ title: "text", description: "text" });
 
 // Geo bounding-box queries

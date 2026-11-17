@@ -68,12 +68,10 @@ export const buildSearchQuery = (filters) => {
         query.lng = { $gte: box.minLng, $lte: box.maxLng };
     }
 
-    // ── Projection: NEVER expose secret_detail ──────────────────
-    const projection = { secret_detail: 0 };
-
-    if (needsTextScore) {
-        projection.score = { $meta: "textScore" };
-    }
+    // ── Projection ─────────────────────────────────────────────
+    const projection = needsTextScore
+        ? { score: { $meta: "textScore" } }
+        : {};
 
     return { query, projection, needsTextScore };
 };

@@ -16,7 +16,6 @@ paths:
       summary: Search and explore posts
       description: |
         Retrieves active posts matching multiple optional criteria.
-        Guarantees that `secret_detail` is never returned.
         Returns recommendations/suggestions if no posts match.
       tags:
         - Search & Exploration
@@ -139,12 +138,12 @@ paths:
           example: 10
 
       responses:
-        '200':
+        "200":
           description: Search completed successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SearchResponse'
+                $ref: "#/components/schemas/SearchResponse"
               examples:
                 successWithResults:
                   summary: Matching posts found
@@ -187,12 +186,12 @@ paths:
                       - "Élargissez la plage de dates."
                       - "Augmentez le rayon de recherche (actuellement 2 km)."
 
-        '422':
+        "422":
           description: Validation error on query parameters.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 error:
                   code: "VALIDATION_ERROR"
@@ -276,9 +275,9 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Post'
+            $ref: "#/components/schemas/Post"
         pagination:
-          $ref: '#/components/schemas/Pagination'
+          $ref: "#/components/schemas/Pagination"
         suggestions:
           type: array
           items:

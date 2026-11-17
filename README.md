@@ -13,7 +13,7 @@ Le binôme 2 est responsable du moteur de recherche et de l'exploration des déc
 * **Format des réponses (200 OK) :**
   ```json
   {
-    "data": [ /* liste des déclarations sans secret_detail */ ],
+    "data": [ /* liste des déclarations */ ],
     "pagination": {
       "page": 1,
       "limit": 20,
@@ -72,7 +72,6 @@ Afin d'éviter tout `COLLSCAN` (parcours complet de collection) et garantir des 
    * Optimise la combinaison de filtres la plus fréquente.
 2. **Index texte :** `{ title: "text", description: "text" }`
    * Permet la recherche par mots-clés (`q`) avec calcul de pertinence (`score: { $meta: "textScore" }`).
-   * **Exclut explicitement** le champ confidentiel `secret_detail`.
 3. **Index géographique :** `{ lat: 1, lng: 1 }`
    * Accélère les requêtes par boîte englobante (*bounding box*).
 4. **Index temporel :** `{ created_at: -1 }`
@@ -83,7 +82,6 @@ Afin d'éviter tout `COLLSCAN` (parcours complet de collection) et garantir des 
 ### 5. Règles de Conception à Justifier à l'Oral
 
 * **Seuls les posts `status = active` sont cherchés par défaut :** les déclarations résolues ou expirées sont masquées pour ne pas encombrer les résultats pertinents.
-* **Confidentialité (`secret_detail`) :** le détail secret sert de preuve de propriété lors de la restitution. Il est marqué `{ select: false }` au niveau du schéma et **exclu de la projection, de l'index texte et de toute réponse HTTP**.
 * **Fenêtre temporelle par chevauchement :** pour trouver un objet perdu/trouvé, on teste le chevauchement d'intervalles (`post.start <= to` ET `post.end >= from`).
 * **Géolocalisation par boîte englobante :** conversion du rayon en boîte lat/lng via formule géodésique, filtrage rapide par index `{ lat: 1, lng: 1 }`, puis calcul précis de la distance Haversine et tri par proximité.
 * **Gestion du 0 résultat :** retour HTTP 200 avec `data: []` accompagné de `suggestions` actionnables (élargir le rayon, enlever la catégorie, étendre les dates).
