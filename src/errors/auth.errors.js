@@ -1,11 +1,10 @@
-
-const {
+import {
     AuthenticationError,
     AuthorizationError,
     ConflictError
-} = require("./http.errors");
+} from "./http.errors.js";
 
-class EmailAlreadyExistsError extends ConflictError {
+export class EmailAlreadyExistsError extends ConflictError {
     constructor() {
         super(
             { field: "email" },
@@ -17,35 +16,35 @@ class EmailAlreadyExistsError extends ConflictError {
     }
 }
 
-class InvalidCredentialsError extends AuthenticationError {
+export class InvalidCredentialsError extends AuthenticationError {
     constructor() {
         super("Invalid email or password.", "INVALID_CREDENTIALS");
         this.messageKey = "errors.invalidCredentials";
     }
 }
 
-class TokenMissingError extends AuthenticationError {
+export class TokenMissingError extends AuthenticationError {
     constructor() {
         super("Authentication token is required.", "TOKEN_MISSING");
         this.messageKey = "errors.tokenMissing";
     }
 }
 
-class TokenInvalidError extends AuthenticationError {
+export class TokenInvalidError extends AuthenticationError {
     constructor() {
         super("Authentication token is invalid.", "TOKEN_INVALID");
         this.messageKey = "errors.tokenInvalid";
     }
 }
 
-class TokenExpiredError extends AuthenticationError {
+export class TokenExpiredError extends AuthenticationError {
     constructor() {
         super("Authentication token has expired.", "TOKEN_EXPIRED");
         this.messageKey = "errors.tokenExpired";
     }
 }
 
-class InsufficientRoleError extends AuthorizationError {
+export class InsufficientRoleError extends AuthorizationError {
     constructor() {
         super("You do not have permission to access this resource.");
         this.code = "INSUFFICIENT_ROLE";
@@ -53,7 +52,7 @@ class InsufficientRoleError extends AuthorizationError {
     }
 }
 
-module.exports = {
+export default {
     EmailAlreadyExistsError,
     InvalidCredentialsError,
     TokenMissingError,

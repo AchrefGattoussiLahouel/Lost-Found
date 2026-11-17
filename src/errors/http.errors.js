@@ -1,8 +1,7 @@
+import AppError from "./AppError.js";
+import ERROR_CODES from "./errorCodes.js";
 
-const AppError = require("./AppError");
-const ERROR_CODES = require("./errorCodes");
-
-class BadRequestError extends AppError {
+export class BadRequestError extends AppError {
     constructor(details, message = "Invalid request") {
         super({
             ...ERROR_CODES.BAD_REQUEST,
@@ -13,7 +12,7 @@ class BadRequestError extends AppError {
     }
 }
 
-class ValidationError extends AppError {
+export class ValidationError extends AppError {
     constructor(details, message = "One or more fields are invalid.") {
         super({
             ...ERROR_CODES.VALIDATION_ERROR,
@@ -24,7 +23,7 @@ class ValidationError extends AppError {
     }
 }
 
-class AuthenticationError extends AppError {
+export class AuthenticationError extends AppError {
     constructor(message = "Authentication required.", code = "UNAUTHENTICATED") {
         super({
             ...ERROR_CODES.UNAUTHENTICATED,
@@ -34,7 +33,7 @@ class AuthenticationError extends AppError {
     }
 }
 
-class AuthorizationError extends AppError {
+export class AuthorizationError extends AppError {
     constructor(message = "You are not allowed to perform this action.") {
         super({
             ...ERROR_CODES.FORBIDDEN,
@@ -44,7 +43,7 @@ class AuthorizationError extends AppError {
     }
 }
 
-class NotFoundError extends AppError {
+export class NotFoundError extends AppError {
     constructor(resource, id) {
         super({
             ...ERROR_CODES.NOT_FOUND,
@@ -55,7 +54,7 @@ class NotFoundError extends AppError {
     }
 }
 
-class ConflictError extends AppError {
+export class ConflictError extends AppError {
     constructor(details, message = "Resource conflict.") {
         super({
             ...ERROR_CODES.CONFLICT,
@@ -66,7 +65,7 @@ class ConflictError extends AppError {
     }
 }
 
-class PayloadTooLargeError extends AppError {
+export class PayloadTooLargeError extends AppError {
     constructor() {
         super({
             ...ERROR_CODES.PAYLOAD_TOO_LARGE,
@@ -75,7 +74,7 @@ class PayloadTooLargeError extends AppError {
     }
 }
 
-class RateLimitError extends AppError {
+export class RateLimitError extends AppError {
     constructor(retryAfter) {
         super({
             ...ERROR_CODES.RATE_LIMIT_EXCEEDED,
@@ -86,7 +85,7 @@ class RateLimitError extends AppError {
     }
 }
 
-class InternalError extends AppError {
+export class InternalError extends AppError {
     constructor(cause) {
         super({
             ...ERROR_CODES.INTERNAL_SERVER_ERROR,
@@ -97,7 +96,7 @@ class InternalError extends AppError {
     }
 }
 
-class DependencyError extends AppError {
+export class DependencyError extends AppError {
     constructor(cause) {
         super({
             ...ERROR_CODES.EXTERNAL_DEPENDENCY_FAILURE,
@@ -108,7 +107,7 @@ class DependencyError extends AppError {
     }
 }
 
-class ServiceUnavailableError extends AppError {
+export class ServiceUnavailableError extends AppError {
     constructor(cause) {
         super({
             ...ERROR_CODES.SERVICE_UNAVAILABLE,
@@ -119,7 +118,7 @@ class ServiceUnavailableError extends AppError {
     }
 }
 
-class TimeoutError extends AppError {
+export class TimeoutError extends AppError {
     constructor(cause) {
         super({
             ...ERROR_CODES.DEPENDENCY_TIMEOUT,
@@ -130,7 +129,7 @@ class TimeoutError extends AppError {
     }
 }
 
-module.exports = {
+export default {
     BadRequestError,
     ValidationError,
     AuthenticationError,

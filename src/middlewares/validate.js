@@ -1,5 +1,4 @@
-
-const { ValidationError } = require("../errors");
+import { ValidationError } from "../errors/index.js";
 
 const JOI_ERROR_CODES = {
     "any.required": "FIELD_REQUIRED",
@@ -16,7 +15,7 @@ const JOI_ERROR_CODES = {
     "date.max": "INVALID_VALUE"
 };
 
-const validate = (schema, source = "body") => (req, res, next) => {
+export const validate = (schema, source = "body") => (req, res, next) => {
     const { error, value } = schema.validate(req[source], {
         abortEarly: false,
         stripUnknown: true,
@@ -57,4 +56,4 @@ const validate = (schema, source = "body") => (req, res, next) => {
     next();
 };
 
-module.exports = validate;
+export default validate;

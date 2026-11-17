@@ -1,11 +1,13 @@
+import AppError from "./AppError.js";
+import ERROR_CODES from "./errorCodes.js";
+import * as httpErrors from "./http.errors.js";
+import * as authErrors from "./auth.errors.js";
 
-const AppError = require("./AppError");
-const ERROR_CODES = require("./errorCodes");
+export { AppError, ERROR_CODES };
+export * from "./http.errors.js";
+export * from "./auth.errors.js";
 
-const httpErrors = require("./http.errors");
-const authErrors = require("./auth.errors");
-
-module.exports = {
+export default {
     AppError,
     ERROR_CODES,
     ...httpErrors,

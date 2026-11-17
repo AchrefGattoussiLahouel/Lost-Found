@@ -1,5 +1,4 @@
-
-const {
+import {
     AppError,
     ValidationError,
     ConflictError,
@@ -8,7 +7,7 @@ const {
     InternalError,
     TokenInvalidError,
     TokenExpiredError
-} = require("../errors");
+} from "../errors/index.js";
 
 const normalizeError = (err) => {
     // Malformed JSON body
@@ -72,7 +71,7 @@ const normalizeError = (err) => {
     return new InternalError(err);
 };
 
-const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, req, res, next) => {
     if (res.headersSent) {
         return next(err);
     }
@@ -116,4 +115,4 @@ const errorHandler = (err, req, res, next) => {
     });
 };
 
-module.exports = errorHandler;
+export default errorHandler;

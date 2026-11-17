@@ -1,8 +1,9 @@
-const express = require("express");
-const errorHandler = require("./middlewares/errorHandler");
+import express from "express";
+import errorHandler from "./middlewares/errorHandler.js";
+
 const app = express();
 
 app.use(express.json({ limit: "10kb" }));
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

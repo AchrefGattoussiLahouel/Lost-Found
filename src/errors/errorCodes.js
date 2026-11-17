@@ -1,5 +1,4 @@
-
-const ERROR_CODES = Object.freeze({
+export const ERROR_CODES = Object.freeze({
     BAD_REQUEST: {
         status: 400,
         messageKey: "errors.badRequest"
@@ -50,4 +49,4 @@ const ERROR_CODES = Object.freeze({
     }
 });
 
-module.exports = ERROR_CODES;
+export default ERROR_CODES;
