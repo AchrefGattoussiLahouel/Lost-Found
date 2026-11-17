@@ -76,3 +76,4 @@ const Post = mongoose.model("Post", postSchema);
 
 export { POST_INTENTS, POST_STATUSES };
 export default Post;
+

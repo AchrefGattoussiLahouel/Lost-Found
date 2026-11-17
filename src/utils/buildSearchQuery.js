@@ -84,3 +84,4 @@ function escapeRegex(str) {
 }
 
 export default buildSearchQuery;
+

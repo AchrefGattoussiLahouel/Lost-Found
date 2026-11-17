@@ -89,3 +89,4 @@ function buildSuggestions(params) {
 }
 
 export default { searchPosts };
+

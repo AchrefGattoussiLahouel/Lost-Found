@@ -40,3 +40,4 @@ export const paginationMeta = ({ total, page, limit }) => {
         hasPrevPage: page > 1
     };
 };
+

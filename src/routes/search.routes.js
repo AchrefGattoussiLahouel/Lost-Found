@@ -9,3 +9,4 @@ const router = Router();
 router.get("/", validate(searchSchema, "query"), search);
 
 export default router;
+

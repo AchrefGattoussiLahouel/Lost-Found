@@ -69,3 +69,4 @@ const searchSchema = Joi.object({
     .with("to", "from");    // to requires from
 
 export default searchSchema;
+
