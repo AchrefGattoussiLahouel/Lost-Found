@@ -1,25 +1,22 @@
-const jwt = require("jsonwebtoken");
+import jwt  from "jsonwebtoken";
+import {STATUS} from "../constants/status.js";
+import User  from"../models/user.js";
 
-const User = require("../models/user");
-
-const {
-    TokenMissingError,
-    TokenInvalidError,
-    InsufficientRoleError
-} = require("../errors");
+import Errors from "../errors/index.js";
 
 const authenticate = async (req, res, next) => {
     try {
         const authorization = req.headers.authorization;
+        const status = req.headers.status;
 
         if (!authorization || !authorization.startsWith("Bearer ")) {
-            throw new TokenMissingError();
+            throw new Errors.TokenMissingError();
         }
 
         const token = authorization.split(" ")[1];
 
         if (!token) {
-            throw new TokenMissingError();
+            throw new Errors.TokenMissingError();
         }
 
         const payload = jwt.verify(
@@ -28,13 +25,17 @@ const authenticate = async (req, res, next) => {
         );
 
         if (!payload.sub) {
-            throw new TokenInvalidError();
+            throw new Errors.TokenInvalidError();
         }
 
         const user = await User.findById(payload.sub);
 
         if (!user) {
-            throw new TokenInvalidError();
+            throw new Errors.TokenInvalidError();
+        }
+        
+        if(status !== STATUS.ACTIVE){
+            throw new Errors.AccountNotActiveError();
         }
 
         req.user = user;
@@ -48,18 +49,18 @@ const authenticate = async (req, res, next) => {
 const authorize = (...allowedRoles) => {
     return (req, res, next) => {
         if (!req.user) {
-            return next(new TokenMissingError());
+            return next(new Errors.TokenMissingError());
         }
 
         if (!allowedRoles.includes(req.user.role)) {
-            return next(new InsufficientRoleError());
+            return next(new Errors.InsufficientRoleError());
         }
 
         next();
     };
 };
 
-module.exports = {
+export default {
     authenticate,
     authorize
 };

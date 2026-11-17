@@ -1,81 +1,75 @@
-const bcrypt = require("bcryptjs");
-
-const User = require("../models/user");
-const ROLES = require("../constants/roles");
-const { generateToken } = require("../utils/jwt");
-
-const {
-    EmailAlreadyExistsError,
-    InvalidCredentialsError
-} = require("../errors");
+import bcrypt from "bcryptjs";
+import User from "../models/user.js";
+import ROLES from "../constants/roles.js";
+import { STATUS } from "../constants/status.js";
+import generateToken from "../utils/jwt.js";
+import Errors from "../errors/index.js";
 
 const sanitizeUser = (user) => {
-    const userObject = user.toObject
-        ? user.toObject()
-        : { ...user };
+  const userObject = user.toObject ? user.toObject() : { ...user };
 
-    delete userObject.password;
-    delete userObject.__v;
+  delete userObject.password;
+  delete userObject.__v;
 
-    return userObject;
+  return userObject;
 };
 
 const register = async (userData) => {
-    const existingUser = await User.exists({
-        email: userData.email
-    });
+  const existingUser = await User.exists({
+    email: userData.email,
+  });
 
-    if (existingUser) {
-        throw new EmailAlreadyExistsError();
-    }
+  if (existingUser) {
+    throw new Errors.EmailAlreadyExistsError();
+  }
 
-    const hashedPassword = await bcrypt.hash(
-        userData.password,
-        12
-    );
+  const hashedPassword = await bcrypt.hash(userData.password, 12);
 
-    const user = await User.create({
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        password: hashedPassword,
-        phone: userData.phone || null,
-        role: ROLES.MEMBRE
-    });
+  const user = await User.create({
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    email: userData.email,
+    password: hashedPassword,
+    phone: userData.phone || null,
+    role: ROLES.MEMBRE,
+    status: STATUS.PENDING,
+  });
 
-    const token = generateToken(user._id);
+  const token = generateToken(user._id);
 
-    return {
-        user: sanitizeUser(user),
-        token
-    };
+  return {
+    user: sanitizeUser(user),
+    token,
+  };
 };
 
 const login = async ({ email, password }) => {
-    const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email }).select("+password");
 
-    if (!user) {
-        throw new InvalidCredentialsError();
-    }
+  if (!user) {
+    throw new Errors.InvalidCredentialsError();
+  }
 
-    const passwordMatches = await bcrypt.compare(
-        password,
-        user.password
-    );
+  const passwordMatches = await bcrypt.compare(password, user.password);
 
-    if (!passwordMatches) {
-        throw new InvalidCredentialsError();
-    }
+  const status = user.status;
+  if (status !== STATUS.ACTIVE) {
+    throw new Errors.AccountNotActiveError();
+  }
 
-    const token = generateToken(user._id);
+  if (!passwordMatches) {
+    throw new Errors.InvalidCredentialsError();
+  }
 
-    return {
-        user: sanitizeUser(user),
-        token
-    };
+  const token = generateToken(user._id);
+
+  return {
+    user: sanitizeUser(user),
+    token,
+  };
 };
 
-module.exports = {
-    register,
-    login
+export default {
+  register,
+  login,
 };
