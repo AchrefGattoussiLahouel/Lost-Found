@@ -34,7 +34,7 @@ const authenticate = async (req, res, next) => {
             throw new Errors.TokenInvalidError();
         }
         
-        if(status !== STATUS.ACTIVE){
+        if(user.status !== STATUS.ACTIVE){
             throw new Errors.AccountNotActiveError();
         }
 

@@ -45,7 +45,10 @@ const userSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: Object.values(STATUS),
+      default: STATUS.PENDING,
+      required: true,
     },
+    
   },
   {
     timestamps: true,

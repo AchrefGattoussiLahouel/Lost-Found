@@ -39,7 +39,8 @@ const register = async (userData) => {
 
   return {
     user: sanitizeUser(user),
-    token,
+    message:
+      "User registered successfully. Please check your email to activate your account.",
   };
 };
 
@@ -53,12 +54,13 @@ const login = async ({ email, password }) => {
   const passwordMatches = await bcrypt.compare(password, user.password);
 
   const status = user.status;
-  if (status !== STATUS.ACTIVE) {
-    throw new Errors.AccountNotActiveError();
-  }
 
   if (!passwordMatches) {
     throw new Errors.InvalidCredentialsError();
+  }
+
+  if (status !== STATUS.ACTIVE) {
+    throw new Errors.AccountNotActiveError();
   }
 
   const token = generateToken(user._id);
