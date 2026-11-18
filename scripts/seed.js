@@ -19,6 +19,16 @@ const CATEGORIES = [
     "ordinateur", "tablette", "parapluie", "livre", "autre"
 ];
 
+const ZONES = [
+    "Food Court",
+    "Electronics",
+    "Clothing",
+    "Cinema",
+    "Parking",
+    "Entrance A",
+    "Entrance B"
+];
+
 const LOCATIONS = [
     { name: "Bibliothèque",    lat: 36.8065, lng: 10.1815 },
     { name: "Cafétéria",       lat: 36.8070, lng: 10.1820 },
@@ -64,6 +74,7 @@ function generatePost() {
     return {
         intent,
         category: pick(CATEGORIES),
+        zone: pick(ZONES),
         title: pick(intent === "lost" ? TITLES_LOST : TITLES_FOUND),
         description: `Objet ${intent === "lost" ? "perdu" : "trouvé"} près de ${loc.name}.`,
         lat: loc.lat + (Math.random() - 0.5) * 0.005,

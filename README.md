@@ -35,6 +35,7 @@ Le binôme 2 est responsable du moteur de recherche et de l'exploration des déc
 | `q` | String | Max 200 caractères | Recherche plein texte (titre & description) |
 | `intent` | String | `lost` ou `found` | Type d'intention |
 | `category` | String | Max 50 caractères | Catégorie (insensible à la casse) |
+| `zone` | String | Max 100 caractères | Zone du centre commercial (ex: `Food Court`) |
 | `lat`, `lng` | Number | `[-90, 90]` et `[-180, 180]` (interdépendants) | Coordonnées GPS du centre de recherche |
 | `radius` | Number | Min 0.1, Max 100 km (défaut: 5) | Rayon de recherche en km |
 | `from`, `to` | Date ISO | `to >= from` | Fenêtre temporelle de recherche |
@@ -74,7 +75,9 @@ Afin d'éviter tout `COLLSCAN` (parcours complet de collection) et garantir des 
    * Permet la recherche par mots-clés (`q`) avec calcul de pertinence (`score: { $meta: "textScore" }`).
 3. **Index géographique :** `{ lat: 1, lng: 1 }`
    * Accélère les requêtes par boîte englobante (*bounding box*).
-4. **Index temporel :** `{ created_at: -1 }`
+4. **Index de zone :** `{ zone: 1 }`
+   * Accélère le filtrage direct par zone de centre commercial (`IXSCAN`).
+5. **Index temporel :** `{ created_at: -1 }`
    * Accélère le tri chronologique par défaut.
 
 ---

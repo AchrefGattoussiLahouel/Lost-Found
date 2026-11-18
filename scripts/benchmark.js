@@ -43,6 +43,11 @@ const QUERIES = [
         filter: { status: "active" },
         sort: { created_at: -1 },
         limit: 20
+    },
+    {
+        name: "6. Filter by zone (index {zone: 1})",
+        filter: { zone: "Food Court", status: "active" },
+        limit: 20
     }
 ];
 

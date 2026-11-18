@@ -16,6 +16,7 @@ export const buildSearchQuery = (filters) => {
         q,
         intent,
         category,
+        zone,
         lat,
         lng,
         radius,
@@ -37,6 +38,11 @@ export const buildSearchQuery = (filters) => {
     // ── Category ────────────────────────────────────────────────
     if (category) {
         query.category = new RegExp(`^${escapeRegex(category)}$`, "i");
+    }
+
+    // ── Zone ────────────────────────────────────────────────────
+    if (zone) {
+        query.zone = new RegExp(`^${escapeRegex(zone)}$`, "i");
     }
 
     // ── Full-text search ────────────────────────────────────────

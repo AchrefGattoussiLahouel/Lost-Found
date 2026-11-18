@@ -66,6 +66,10 @@ function buildSuggestions(params) {
         tips.push("Essayez sans filtre de catégorie.");
     }
 
+    if (params.zone) {
+        tips.push("Essayez sans filtre de zone.");
+    }
+
     if (params.from || params.to) {
         tips.push("Élargissez la plage de dates.");
     }

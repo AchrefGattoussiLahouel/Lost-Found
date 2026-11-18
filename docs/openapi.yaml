@@ -47,6 +47,15 @@ paths:
             maxLength: 50
           example: "téléphone"
 
+        - name: zone
+          in: query
+          description: Mall zone name (case-insensitive match).
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+          example: "Food Court"
+
         - name: lat
           in: query
           description: Center latitude for bounding-box radius search (-90 to 90). Must be paired with `lng`.
@@ -216,6 +225,10 @@ components:
           enum: [lost, found]
         category:
           type: string
+        zone:
+          type: string
+          nullable: true
+          example: "Food Court"
         title:
           type: string
         description:

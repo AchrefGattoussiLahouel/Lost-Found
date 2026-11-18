@@ -33,6 +33,12 @@ const postSchema = new mongoose.Schema(
             type: String,
             default: ""
         },
+        zone: {
+            type: String,
+            trim: true,
+            maxlength: 100,
+            index: true
+        },
         lat: { type: Number, default: null },
         lng: { type: Number, default: null },
         start: { type: Date, default: null },

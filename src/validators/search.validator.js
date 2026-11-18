@@ -16,6 +16,12 @@ const searchSchema = Joi.object({
         .max(50)
         .optional(),
 
+    zone: Joi.string()
+        .trim()
+        .max(100)
+        .allow("")
+        .optional(),
+
     lat: Joi.number()
         .min(-90)
         .max(90)

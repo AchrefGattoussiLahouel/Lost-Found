@@ -230,6 +230,38 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "8 — Recherche par zone (Mall Zone)",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search?zone=Food%20Court&intent=lost",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search"],
+                    "query": [
+                        { "key": "zone", "value": "Food Court" },
+                        { "key": "intent", "value": "lost" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                            "pm.test('Results match requested zone', () => {",
+                            "    const json = pm.response.json();",
+                            "    json.data.forEach(d => {",
+                            "        pm.expect(d.zone.toLowerCase()).to.eql('food court');",
+                            "        pm.expect(d.intent).to.eql('lost');",
+                            "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ]
         }
     ]
 }
