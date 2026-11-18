@@ -1,5 +1,5 @@
 import amqp from "amqplib";
-
+import "dotenv/config";
 let connection;
 let confirmChannel;
 let connectionPromise;
@@ -58,9 +58,13 @@ export async function closeRabbitMQ() {
   connection = undefined;
 
   if (channelToClose) {
-    try { await channelToClose.close(); } catch {}
+    try {
+      await channelToClose.close();
+    } catch {}
   }
   if (connectionToClose) {
-    try { await connectionToClose.close(); } catch {}
+    try {
+      await connectionToClose.close();
+    } catch {}
   }
 }

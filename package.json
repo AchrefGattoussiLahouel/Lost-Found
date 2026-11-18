@@ -26,13 +26,19 @@
     "url": "https://github.com/AchrefGattoussiLahouel/Lost-Found/issues"
   },
   "homepage": "https://github.com/AchrefGattoussiLahouel/Lost-Found#readme",
+
+
   "dependencies": {
-    "amqplib": "^2.4.0",
-    "bcryptjs": "^3.0.3",
-    "dotenv": "^18.0.10",
-    "express": "^5.3.0",
-    "joi": "^18.3.2",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.12.1"
-  }
+  "@huggingface/transformers": "^4.3.2",
+  "amqplib": "^2.4.0",
+  "bcrypt": "^6.0.0",
+  "bcryptjs": "^3.0.3",
+  "cors": "^2.8.6",
+  "dotenv": "^18.0.10",
+  "express": "^5.3.0",
+  "joi": "^18.3.2",
+  "jsonwebtoken": "^9.0.3",
+  "mongoose": "^9.12.2"
+}
+
 }
