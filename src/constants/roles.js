@@ -4,4 +4,4 @@ const ROLES = Object.freeze({
     MEMBRE: "membre"
 });
 
-module.exports = ROLES;
+export default ROLES;

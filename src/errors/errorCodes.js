@@ -50,4 +50,4 @@ const ERROR_CODES = Object.freeze({
     }
 });
 
-module.exports = ERROR_CODES;
+export default ERROR_CODES;
