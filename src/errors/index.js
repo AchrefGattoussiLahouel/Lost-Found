@@ -26,6 +26,16 @@ import {
   AccountNotActiveError,
 } from "./auth.errors.js";
 
+
+
+import {
+  ReportAlreadyExistsError,
+  ReportAlreadyClosedError,
+  CannotReportOwnDeclarationError,
+}from "./moderation.errors.js"
+
+
+
 export default {
   AppError,
   ERROR_CODES,
@@ -48,4 +58,9 @@ export default {
   TokenExpiredError,
   InsufficientRoleError,
   AccountNotActiveError,
+  ReportAlreadyExistsError,
+  ReportAlreadyClosedError,
+  CannotReportOwnDeclarationError,
 };
+
+
