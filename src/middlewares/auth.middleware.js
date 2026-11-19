@@ -1,13 +1,12 @@
-import jwt  from "jsonwebtoken";
-import {STATUS} from "../constants/status.js";
-import User  from"../models/user.js";
 
+import jwt from "jsonwebtoken";
+import { STATUS } from "../constants/status.js";
+import User from "../models/user.js";
 import Errors from "../errors/index.js";
 
 const authenticate = async (req, res, next) => {
     try {
         const authorization = req.headers.authorization;
-        const status = req.headers.status;
 
         if (!authorization || !authorization.startsWith("Bearer ")) {
             throw new Errors.TokenMissingError();
@@ -33,8 +32,8 @@ const authenticate = async (req, res, next) => {
         if (!user) {
             throw new Errors.TokenInvalidError();
         }
-        
-        if(user.status !== STATUS.ACTIVE){
+
+        if (user.status !== STATUS.ACTIVE) {
             throw new Errors.AccountNotActiveError();
         }
 
@@ -62,5 +61,5 @@ const authorize = (...allowedRoles) => {
 
 export default {
     authenticate,
-    authorize
+    authorize,
 };

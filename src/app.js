@@ -1,7 +1,7 @@
 import express from "express";
 import errorHandler from "./middlewares/errorHandler.js";
 import authRoutes from "./routes/auth.routes.js";
-
+import userRoutes from "./routes/user.routes.js";
 const app = express();
 
 app.use(express.json({ limit: "10kb" }));
@@ -12,9 +12,9 @@ app.get("/", (req, res) => {
   });
 });
 
-// Authentication routes
-app.use("/api/auth", authRoutes);
 
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 // Error handler (must remain last)
 app.use(errorHandler);
 
