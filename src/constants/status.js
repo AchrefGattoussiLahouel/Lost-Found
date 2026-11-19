@@ -1,5 +1,6 @@
 export const STATUS = {
-  ACTIVE: "active",
-  PENDING: "pending",
-  BANNED: "banned",
+    ACTIVE: "active",
+    PENDING: "pending",
+    BANNED: "banned",
+    DELETED: "deleted",
 };
