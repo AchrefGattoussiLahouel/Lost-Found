@@ -1,8 +1,12 @@
-import { getRabbitMQChannel } from "../../../../infrastructure/messaging/rabbitmq/rabbitmq.connection.js";
+import { getRabbitMQChannel } from "./rabbitmq.connection.js";
 import {
-  MATCHING_EXCHANGE, MATCHING_ROUTING_KEY, MATCHING_QUEUE,
-  MATCHING_RETRY_QUEUE, MATCHING_DLQ, MATCHING_RETRY_DELAY_MS
-} from "../../../../infrastructure/messaging/rabbitmq/rabbitmq.constants.js";
+  MATCHING_EXCHANGE,
+  MATCHING_ROUTING_KEY,
+  MATCHING_QUEUE,
+  MATCHING_RETRY_QUEUE,
+  MATCHING_DLQ,
+  MATCHING_RETRY_DELAY_MS,
+} from "./rabbitmq.constants.js";
 
 export async function declareMatchingTopology() {
   const channel = getRabbitMQChannel();
@@ -13,8 +17,8 @@ export async function declareMatchingTopology() {
     durable: true,
     arguments: {
       "x-dead-letter-exchange": MATCHING_EXCHANGE,
-      "x-dead-letter-routing-key": MATCHING_ROUTING_KEY
-    }
+      "x-dead-letter-routing-key": MATCHING_ROUTING_KEY,
+    },
   });
 
   await channel.assertQueue(MATCHING_RETRY_QUEUE, {
@@ -22,17 +26,21 @@ export async function declareMatchingTopology() {
     arguments: {
       "x-message-ttl": MATCHING_RETRY_DELAY_MS,
       "x-dead-letter-exchange": MATCHING_EXCHANGE,
-      "x-dead-letter-routing-key": MATCHING_ROUTING_KEY
-    }
+      "x-dead-letter-routing-key": MATCHING_ROUTING_KEY,
+    },
   });
 
   await channel.assertQueue(MATCHING_DLQ, { durable: true });
-  await channel.bindQueue(MATCHING_QUEUE, MATCHING_EXCHANGE, MATCHING_ROUTING_KEY);
+  await channel.bindQueue(
+    MATCHING_QUEUE,
+    MATCHING_EXCHANGE,
+    MATCHING_ROUTING_KEY,
+  );
 
   return {
     exchange: MATCHING_EXCHANGE,
     queue: MATCHING_QUEUE,
     retryQueue: MATCHING_RETRY_QUEUE,
-    deadLetterQueue: MATCHING_DLQ
+    deadLetterQueue: MATCHING_DLQ,
   };
 }

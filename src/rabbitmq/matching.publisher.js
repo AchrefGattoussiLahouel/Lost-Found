@@ -1,8 +1,11 @@
-import { getRabbitMQChannel } from "../../../../infrastructure/messaging/rabbitmq/rabbitmq.connection.js";
+import { getRabbitMQChannel } from "./rabbitmq.connection.js";
 import {
-  MATCHING_EXCHANGE, MATCHING_ROUTING_KEY
-} from "../../../../infrastructure/messaging/rabbitmq/rabbitmq.constants.js";
-import { createPostCreatedEvent } from "../../domain/events/post-created.event.js";
+  MATCHING_EXCHANGE,
+  MATCHING_ROUTING_KEY,
+} from "./rabbitmq.constants.js";
+
+import { createPostCreatedEvent } from "./post-created.event.js";
+
 import { declareMatchingTopology } from "./matching.topology.js";
 
 export async function publishPostCreated(post) {
@@ -21,9 +24,9 @@ export async function publishPostCreated(post) {
         contentType: "application/json",
         messageId: event.eventId,
         type: event.eventType,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       },
-      (error) => error ? reject(error) : resolve()
+      (error) => (error ? reject(error) : resolve()),
     );
   });
 
