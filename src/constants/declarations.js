@@ -1,0 +1,33 @@
+export const INTENTS = Object.freeze({ LOST: "lost", FOUND: "found" });
+
+export const DECLARATION_STATUS = Object.freeze({
+  ACTIVE: "active",
+  MATCHED: "matched",
+  CLOSED: "closed",
+});
+
+export const CLOSE_REASONS = Object.freeze({
+  RESOLVED: "resolved",
+  EXPIRED: "expired",
+  DELETED_BY_USER: "deleted_by_user",
+  MATCH_REFUSED: "match_refused",
+  MODERATION: "moderation",
+});
+
+export const CUSTODY_STATE = Object.freeze({
+  WITH_FINDER: "with_finder",
+  DEPOSIT_REQUIRED: "deposit_required",
+  OFFICE_PENDING: "office_pending",
+  AT_OFFICE: "at_office",
+  RETURNED: "returned",
+});
+
+export const DEPOSIT_REASONS = Object.freeze({
+  OTHER: "other",
+  MATCH_REFUSED: "match_refused",
+  NO_MATCH: "no_match",
+  DEADLINE_PASSED: "deadline_passed",
+});
+
+export const RETENTION_DAYS = 30;          
+export const DEPOSIT_WINDOW_MINUTES = 60;  
