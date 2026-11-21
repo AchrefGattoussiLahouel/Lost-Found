@@ -1,8 +1,11 @@
 import {
-  pipeline, env, AutoProcessor, CLIPVisionModelWithProjection, RawImage,
-} from '@huggingface/transformers';
-import { norm2 } from '../utils/vector';
-
+  pipeline,
+  env,
+  AutoProcessor,
+  CLIPVisionModelWithProjection,
+  RawImage,
+} from "@huggingface/transformers";
+import { norm2 } from "../utils/vector.js";
 
 export class EmbeddingService {
   constructor(cfg) {
@@ -14,18 +17,20 @@ export class EmbeddingService {
 
   async init() {
     env.cacheDir = this.cfg.cacheDir;
-    this.textPipe = await pipeline('feature-extraction', this.cfg.text.id);
+    this.textPipe = await pipeline("feature-extraction", this.cfg.text.id);
     this.imgProcessor = await AutoProcessor.from_pretrained(this.cfg.image.id);
-    this.imgModel = await CLIPVisionModelWithProjection.from_pretrained(this.cfg.image.id);
+    this.imgModel = await CLIPVisionModelWithProjection.from_pretrained(
+      this.cfg.image.id,
+    );
   }
 
   buildPostText(post) {
-    return `${post.category}. ${post.title}. ${post.description || ''}`.trim();
+    return `${post.category}. ${post.title}. ${post.description || ""}`.trim();
   }
 
   async embedText(text) {
-    const out = await this.textPipe(text, { pooling: 'mean', normalize: true });
-    return Array.from(out.data); 
+    const out = await this.textPipe(text, { pooling: "mean", normalize: true });
+    return Array.from(out.data);
   }
 
   async embedImage(filePath) {
@@ -33,6 +38,6 @@ export class EmbeddingService {
     const { image_embeds } = await this.imgModel(inputs);
     const v = Array.from(image_embeds.data);
     const norm = norm2(v);
-    return v.map((x) => x / norm); 
+    return v.map((x) => x / norm);
   }
 }

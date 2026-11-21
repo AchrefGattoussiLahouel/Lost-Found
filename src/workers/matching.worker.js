@@ -2,9 +2,9 @@ import "dotenv/config";
 import {
   connectRabbitMQ,
   closeRabbitMQ,
-} from "../rabbitmq/rabbitmq.connection.js";
-import { startMatchingConsumer } from "../rabbitmq/matching.consumer.js";
-import { processPostCreated } from "../rabbitmq/process-post-created.js";
+} from "../queue/rabbitmq.connection.js";
+import { startMatchingConsumer } from "../queue/matching.consumer.js";
+import { processPostCreated } from "../queue/process-post-created.js";
 let isShuttingDown = false;
 
 async function shutdown(signal) {
