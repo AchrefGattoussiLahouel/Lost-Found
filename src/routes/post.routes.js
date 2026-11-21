@@ -20,7 +20,12 @@ router.get(
   validate(Schema.listQuerySchema, "query"),
   postController.listAll,
 );
-
+router.patch(
+  "/:id",
+  validate(Schema.idParam, "params"),
+  validate(Schema.updateSchema, "body"),
+  postController.update,
+);
 router.get("/:id", validate(Schema.idParam, "params"), postController.getById);
 
 export default router;

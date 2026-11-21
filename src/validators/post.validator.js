@@ -7,6 +7,8 @@ const fields = {
   title: Joi.string().trim().min(3).max(120),
   description: Joi.string().trim().allow("").max(1000),
   category: objectId,
+  color: Joi.string().trim().max(20),
+  brand: Joi.string().trim().max(50),
   place: objectId,
   placeDetails: Joi.string().trim().max(200),
   start: Joi.date().max("now"),
@@ -33,7 +35,19 @@ const createPost = Joi.object({
   }),
 });
 
-const updatePost = Joi.object({ ...fields }).min(1);
+const updateSchema = Joi.object({
+  title: fields.title,
+  description: fields.description,
+  category: objectId,
+  place: objectId,
+  placeDetails: fields.placeDetails,
+  start: fields.start,
+  end: fields.end,
+  color: fields.color,
+  brand: fields.brand,
+  photos: fields.photos,
+  secret_detail: fields.secret_detail,
+}).min(1);
 
 const idParam = Joi.object({ id: objectId.required() });
 
@@ -46,7 +60,7 @@ const listQuerySchema = Joi.object({
 
 export default {
   createPost,
-  updatePost,
   idParam,
   listQuerySchema,
+  updateSchema,
 };

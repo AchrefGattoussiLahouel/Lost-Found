@@ -15,9 +15,18 @@ const listAll = async (req, res) => {
   return res.status(200).json({ data });
 };
 
+const update = async (req, res) => {
+  const data = await postService.update(
+    req.validated.params.id, req.validated.body, req.user
+  );
+  return res.status(200).json({ message: "Post updated.", data });
+}
+
 const mine = async (req, res) => {
   const data = await postService.mine(req.user, req.validated.query);
   return res.status(200).json({ data });
 };
 
-export default { create, getById, listAll, mine };
+
+
+export default { create, getById, listAll, mine, update };

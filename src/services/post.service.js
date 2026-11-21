@@ -41,8 +41,6 @@ const create = async (data, actor) => {
     category: data.category,
     place: data.place,
     placeDetails: data.placeDetails,
-    lat: data.lat ?? place.lat,
-    lng: data.lng ?? place.lng,
     start: data.start,
     end: data.end,
     color: data.color,
@@ -144,4 +142,75 @@ const listAll = async (actor, filters = {}) => {
   };
 };
 
-export default { create, getById, mine, listAll };
+// Update a post by its id for the owner or the staff
+const update = async (id, data, actor) => {
+  const query = Post.findById(id);
+
+  if (isStaff(actor)) {
+    query.select("+secret_detail");
+  }
+
+  const post = await query;
+
+  if (!post) {
+    throw new Errors.PostNotFoundError();
+  }
+
+  if (!canView(actor, post)) {
+    throw new Errors.AuthorizationError();
+  }
+
+  // Don't edit posts involved in a match or already closed.
+  if (post.status !== "active") {
+    throw new Errors.PostNotEditableError();
+  }
+
+  // Only allow these fields to be modified.
+  const editableFields = [
+    "title",
+    "description",
+    "category",
+    "place",
+    "placeDetails",
+    "start",
+    "end",
+    "color",
+    "brand",
+    "photos",
+    "secret_detail",
+  ];
+
+  const updates = {};
+
+  for (const field of editableFields) {
+    if (data[field] !== undefined) {
+      updates[field] = data[field];
+    }
+  }
+
+  if (updates.category) {
+    const category = await Category.findOne({
+      _id: updates.category,
+      isActive: true,
+    });
+
+    if (!category) throw new Errors.InvalidCategoryError();
+  }
+
+  if (updates.place) {
+    const place = await Place.findOne({
+      _id: updates.place,
+      isActive: true,
+    });
+
+    if (!place) throw new Errors.InvalidPlaceError();
+  }
+
+  Object.assign(post, updates);
+
+  await post.save();
+
+  return getById(post._id, actor);
+};
+
+export default { create, getById, mine, listAll, update };

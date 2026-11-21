@@ -22,11 +22,11 @@ const postSchema = new Schema(
     category: ref("Category", { required: true }),
     photos: { type: [String], default: [] },
     secret_detail: { type: String, default: "", maxlength: 300, select: false },
+    color: { type: String, trim: true, maxlength: 20 },
+    brand: { type: String, trim: true, maxlength: 50 },
 
     place: ref("Place", { required: true }),
     placeDetails: { type: String, trim: true, maxlength: 200 },
-    lat: { type: Number, default: null },
-    lng: { type: Number, default: null },
     start: { type: Date, default: null },
     end: { type: Date, default: null },
 
