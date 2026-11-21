@@ -25,6 +25,8 @@ const declarationSchema = new Schema(
 
     place: ref("Place", { required: true }),
     placeDetails: { type: String, trim: true, maxlength: 200 },
+    lat: { type: Number, default: null },
+    lng: { type: Number, default: null },
     start: { type: Date, default: null },
     end: { type: Date, default: null },
 
@@ -43,6 +45,7 @@ const declarationSchema = new Schema(
     closeReason: { type: String, enum: Object.values(CLOSE_REASONS) },
     closedAt: Date,
     expiresAt: Date,
+
 
     //its for the match, if the declaration is matched with another declaration, 
     //this field will contain the id of the ticket that its matching it needs to be added by Nizar and Daly

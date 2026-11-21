@@ -23,11 +23,10 @@ export const CUSTODY_STATE = Object.freeze({
 });
 
 export const DEPOSIT_REASONS = Object.freeze({
-  OTHER: "other",
   MATCH_REFUSED: "match_refused",
   NO_MATCH: "no_match",
   DEADLINE_PASSED: "deadline_passed",
 });
 
-export const RETENTION_DAYS = 30;          
-export const DEPOSIT_WINDOW_MINUTES = 60;  
+export const RETENTION_DAYS = 30;          // time to keep a declaration before it is automatically closed
+export const DEPOSIT_WINDOW_MINUTES = 60;  // time to return the item to the office after a declaration of found is made

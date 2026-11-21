@@ -26,6 +26,13 @@ import {
   AccountNotActiveError,
 } from "./auth.errors.js";
 
+import {
+  ContactRequiredError,
+  DeclarationNotFoundError,
+  InvalidCategoryError,
+  InvalidPlaceError,
+} from "./declarations.errors.js";
+
 export default {
   AppError,
   ERROR_CODES,
@@ -48,4 +55,8 @@ export default {
   TokenExpiredError,
   InsufficientRoleError,
   AccountNotActiveError,
+  ContactRequiredError,
+  DeclarationNotFoundError,
+  InvalidCategoryError,
+  InvalidPlaceError,
 };
