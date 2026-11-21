@@ -1,4 +1,4 @@
-import ROLES from "../constants/roles.js";
+import { ROLES } from "../constants/user.js";
 import Errors from "../errors/index.js";
 
 export const TRANSITIONS = {
@@ -36,6 +36,10 @@ const OWNER_FIELDS = [
 ];
 
 export const present = (user, d) => {
+  /* 
+  Convert Mongoose documents into plain obejcts 
+  and add/remove fields depending on the actor.
+  */
   const obj = d.toObject ? d.toObject() : { ...d };
 
   if (isStaff(user)) return obj;

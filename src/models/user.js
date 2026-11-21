@@ -1,6 +1,6 @@
-import { STATUS } from "../constants/status.js";
+import { STATUS } from "../constants/user.js";
 import mongoose from "mongoose";
-import ROLES from "../constants/roles.js";
+import { ROLES } from "../constants/user.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -48,7 +48,6 @@ const userSchema = new mongoose.Schema(
       default: STATUS.PENDING,
       required: true,
     },
-    
   },
   {
     timestamps: true,

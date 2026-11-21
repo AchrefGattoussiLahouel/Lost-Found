@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.js";
-import ROLES from "../constants/roles.js";
-import { STATUS } from "../constants/status.js";
+import { ROLES } from "../constants/user.js";
+import { STATUS } from "../constants/user.js";
 import generateToken from "../utils/jwt.js";
 import Errors from "../errors/index.js";
 
