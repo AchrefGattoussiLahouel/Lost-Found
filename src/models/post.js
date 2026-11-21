@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import {
   INTENTS,
-  DECLARATION_STATUS,
+  POST_STATUS,
   CLOSE_REASONS,
   CUSTODY_STATE,
   DEPOSIT_REASONS,
@@ -33,12 +33,12 @@ const postSchema = new Schema(
     user: ref("User", { default: null }),
     createdBy: ref("User", { required: true }),
     contact: { name: String, phone: String },
-    previousDeclaration: ref("Declaration"),
+    previousPost: ref("Post"),
 
     status: {
       type: String,
-      enum: Object.values(DECLARATION_STATUS),
-      default: DECLARATION_STATUS.ACTIVE,
+      enum: Object.values(POST_STATUS),
+      default: POST_STATUS.ACTIVE,
       required: true,
     },
     closeReason: { type: String, enum: Object.values(CLOSE_REASONS) },
@@ -90,4 +90,4 @@ postSchema.index({ user: 1, createdAt: -1 });
 postSchema.index({ status: 1, expiresAt: 1 });
 postSchema.index({ "custody.state": 1, "custody.depositDeadline": 1 });
 
-export default mongoose.model("Declaration", postSchema);
+export default mongoose.model("Post", postSchema);

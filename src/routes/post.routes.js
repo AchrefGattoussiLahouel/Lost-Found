@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.use(Authmiddleware.authenticate);
 
-router.post("/", validate(Schema.createDeclaration), postController.create);
+router.post("/", validate(Schema.createPost), postController.create);
 router.get(
   "/mine",
   validate(Schema.listQuerySchema, "query"),

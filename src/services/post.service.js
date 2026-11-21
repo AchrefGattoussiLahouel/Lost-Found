@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import Declaration from "../models/post.js";
+import Post from "../models/post.js";
 import Category from "../models/category.js";
 import Place from "../models/place.js";
 import Errors from "../errors/index.js";
@@ -80,17 +80,17 @@ const create = async (data, actor) => {
     }
   }
 
-  const created = await Declaration.create(doc);
+  const created = await Post.create(doc);
   return getById(created._id, actor);
 };
 // search for a post by its id for the owner or the staff
 const getById = async (id, actor) => {
-  const query = Declaration.findById(id);
+  const query = Post.findById(id);
   if (isStaff(actor)) query.select("+secret_detail");
   const post = await populate(query);
 
   if (!post || !canView(actor, post)) {
-    throw new Errors.DeclarationNotFoundError();
+    throw new Errors.PostNotFoundError();
   }
   return present(actor, post);
 };
@@ -103,10 +103,8 @@ const mine = async (actor, { page = 1, limit = 10, intent, status } = {}) => {
 
   const skip = (page - 1) * limit;
   const [items, total] = await Promise.all([
-    populate(
-      Declaration.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
-    ),
-    Declaration.countDocuments(filter),
+    populate(Post.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit)),
+    Post.countDocuments(filter),
   ]);
 
   return {
@@ -131,10 +129,8 @@ const listAll = async (actor, filters = {}) => {
   const skip = (page - 1) * limit;
 
   const [items, total] = await Promise.all([
-    populate(
-      Declaration.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
-    ),
-    Declaration.countDocuments(filter),
+    populate(Post.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit)),
+    Post.countDocuments(filter),
   ]);
 
   return {

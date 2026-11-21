@@ -2,7 +2,7 @@ import postService from "../services/post.service.js";
 
 const create = async (req, res) => {
   const data = await postService.create(req.validated.body, req.user);
-  return res.status(201).json({ message: "Declaration created.", data });
+  return res.status(201).json({ message: "Post created.", data });
 };
 
 const getById = async (req, res) => {

@@ -1,11 +1,11 @@
 import { AppError } from "./AppError.js";
 
-class DeclarationNotFoundError extends AppError {
+class PostNotFoundError extends AppError {
   constructor() {
     super({
       status: 404,
-      code: "DECLARATION_NOT_FOUND",
-      message: "Declaration not found.",
+      code: "POST_NOT_FOUND",
+      message: "Post not found.",
     });
   }
 }
@@ -43,7 +43,7 @@ class ContactRequiredError extends AppError {
 }
 
 export {
-  DeclarationNotFoundError,
+  PostNotFoundError,
   InvalidCategoryError,
   InvalidPlaceError,
   ContactRequiredError,

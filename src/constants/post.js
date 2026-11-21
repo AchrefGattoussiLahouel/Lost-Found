@@ -1,6 +1,6 @@
 export const INTENTS = Object.freeze({ LOST: "lost", FOUND: "found" });
 
-export const DECLARATION_STATUS = Object.freeze({
+export const POST_STATUS = Object.freeze({
   ACTIVE: "active",
   MATCHED: "matched",
   CLOSED: "closed",

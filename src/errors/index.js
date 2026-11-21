@@ -28,7 +28,7 @@ import {
 
 import {
   ContactRequiredError,
-  DeclarationNotFoundError,
+  PostNotFoundError,
   InvalidCategoryError,
   InvalidPlaceError,
 } from "./post.errors.js";
@@ -56,7 +56,7 @@ export default {
   InsufficientRoleError,
   AccountNotActiveError,
   ContactRequiredError,
-  DeclarationNotFoundError,
+  PostNotFoundError,
   InvalidCategoryError,
   InvalidPlaceError,
 };
