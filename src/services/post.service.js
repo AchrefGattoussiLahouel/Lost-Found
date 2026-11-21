@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import Declaration from "../models/declaration.js";
+import Declaration from "../models/post.js";
 import Category from "../models/category.js";
 import Place from "../models/place.js";
 import Errors from "../errors/index.js";
@@ -8,8 +8,8 @@ import {
   CUSTODY_STATE,
   RETENTION_DAYS,
   DEPOSIT_WINDOW_MINUTES,
-} from "../constants/declaration.js";
-import { isStaff, canView, present } from "../rules/declaration.rules.js";
+} from "../constants/post.js";
+import { isStaff, canView, present } from "../rules/post.rules.js";
 
 const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
@@ -23,7 +23,6 @@ const populate = (query) =>
     .populate("place", "name zone lat lng");
 
 const create = async (data, actor) => {
-  // 1. Catégorie et lieu doivent exister et être actifs
   const [category, place] = await Promise.all([
     Category.findOne({ _id: data.category, isActive: true }),
     Place.findOne({ _id: data.place, isActive: true }),
@@ -42,7 +41,7 @@ const create = async (data, actor) => {
     category: data.category,
     place: data.place,
     placeDetails: data.placeDetails,
-    lat: data.lat ?? place.lat, 
+    lat: data.lat ?? place.lat,
     lng: data.lng ?? place.lng,
     start: data.start,
     end: data.end,
@@ -61,19 +60,17 @@ const create = async (data, actor) => {
       doc.contact = data.contact;
     }
   } else {
-    doc.user = actor._id; 
+    doc.user = actor._id;
   }
 
   if (data.intent === INTENTS.FOUND) {
     if (staff) {
-      
       doc.custody = {
         state: CUSTODY_STATE.AT_OFFICE,
         receivedBy: actor._id,
         receivedAt: now,
       };
     } else {
-      
       doc.custody = {
         state: CUSTODY_STATE.WITH_FINDER,
         depositDeadline: new Date(
@@ -86,25 +83,23 @@ const create = async (data, actor) => {
   const created = await Declaration.create(doc);
   return getById(created._id, actor);
 };
-// search for a declaration by its id for the owner or the staff
+// search for a post by its id for the owner or the staff
 const getById = async (id, actor) => {
   const query = Declaration.findById(id);
   if (isStaff(actor)) query.select("+secret_detail");
-  const declaration = await populate(query);
+  const post = await populate(query);
 
-  if (!declaration || !canView(actor, declaration)) {
+  if (!post || !canView(actor, post)) {
     throw new Errors.DeclarationNotFoundError();
   }
-  return present(actor, declaration);
+  return present(actor, post);
 };
 
-// List declarations created by or for the actor either the staff or the owner of the declaration
+// List post created by or for the actor either the staff or the owner of the post
 const mine = async (actor, { page = 1, limit = 10, intent, status } = {}) => {
   const filter = { $or: [{ user: actor._id }, { createdBy: actor._id }] };
   if (intent) filter.intent = intent;
   if (status) filter.status = status;
-
-
 
   const skip = (page - 1) * limit;
   const [items, total] = await Promise.all([
@@ -120,18 +115,13 @@ const mine = async (actor, { page = 1, limit = 10, intent, status } = {}) => {
   };
 };
 
-// List all declarations only for staff
+// List all post only for staff
 const listAll = async (actor, filters = {}) => {
   if (!isStaff(actor)) {
     throw new Errors.AuthorizationError();
   }
 
-  const {
-    page = 1,
-    limit = 10,
-    intent,
-    status,
-  } = filters;
+  const { page = 1, limit = 10, intent, status } = filters;
 
   const filter = {};
 
@@ -142,10 +132,7 @@ const listAll = async (actor, filters = {}) => {
 
   const [items, total] = await Promise.all([
     populate(
-      Declaration.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
+      Declaration.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
     ),
     Declaration.countDocuments(filter),
   ]);

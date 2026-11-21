@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { INTENTS, DECLARATION_STATUS } from "../constants/declaration.js";
+import { INTENTS, DECLARATION_STATUS } from "../constants/post.js";
 
 const objectId = Joi.string().hex().length(24);
 
@@ -16,7 +16,9 @@ const fields = {
 };
 
 const createDeclaration = Joi.object({
-  intent: Joi.string().valid(...Object.values(INTENTS)).required(),
+  intent: Joi.string()
+    .valid(...Object.values(INTENTS))
+    .required(),
   ...fields,
   title: fields.title.required(),
   category: objectId.required(),
@@ -31,7 +33,7 @@ const createDeclaration = Joi.object({
   }),
 });
 
-const updateDeclaration = Joi.object({ ...fields }).min(1); 
+const updateDeclaration = Joi.object({ ...fields }).min(1);
 
 const idParam = Joi.object({ id: objectId.required() });
 
@@ -42,4 +44,9 @@ const listQuerySchema = Joi.object({
   status: Joi.string().valid(...Object.values(DECLARATION_STATUS)),
 });
 
-export default { createDeclaration, updateDeclaration, idParam, listQuerySchema };
+export default {
+  createDeclaration,
+  updateDeclaration,
+  idParam,
+  listQuerySchema,
+};

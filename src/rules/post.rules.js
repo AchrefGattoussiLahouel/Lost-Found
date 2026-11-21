@@ -1,4 +1,3 @@
-
 import ROLES from "../constants/roles.js";
 import Errors from "../errors/index.js";
 
@@ -11,12 +10,10 @@ export const TRANSITIONS = {
 export const isStaff = (user) =>
   [ROLES.PERSONNEL, ROLES.ADMIN].includes(user.role);
 
-export const isOwner = (user, d) =>
-  d.user?.toString() === user._id.toString();
+export const isOwner = (user, d) => d.user?.toString() === user._id.toString();
 
-// Who can view a declaration?
-export const canView = (user, d) =>
-  isStaff(user) || isOwner(user, d);
+// Who can view a post?
+export const canView = (user, d) => isStaff(user) || isOwner(user, d);
 
 // Fields visible to the owner
 const OWNER_FIELDS = [
@@ -45,9 +42,10 @@ export const present = (user, d) => {
 
   if (isOwner(user, d)) {
     return Object.fromEntries(
-      OWNER_FIELDS
-        .filter((field) => field in obj)
-        .map((field) => [field, obj[field]])
+      OWNER_FIELDS.filter((field) => field in obj).map((field) => [
+        field,
+        obj[field],
+      ]),
     );
   }
 

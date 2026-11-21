@@ -5,7 +5,7 @@ import {
   CLOSE_REASONS,
   CUSTODY_STATE,
   DEPOSIT_REASONS,
-} from "../constants/declaration.js";
+} from "../constants/post.js";
 
 const { Schema } = mongoose;
 const ref = (name, extra = {}) => ({
@@ -14,7 +14,7 @@ const ref = (name, extra = {}) => ({
   ...extra,
 });
 
-const declarationSchema = new Schema(
+const postSchema = new Schema(
   {
     intent: { type: String, enum: Object.values(INTENTS), required: true },
     title: { type: String, required: true, trim: true, maxlength: 120 },
@@ -30,7 +30,6 @@ const declarationSchema = new Schema(
     start: { type: Date, default: null },
     end: { type: Date, default: null },
 
-    
     user: ref("User", { default: null }),
     createdBy: ref("User", { required: true }),
     contact: { name: String, phone: String },
@@ -46,10 +45,9 @@ const declarationSchema = new Schema(
     closedAt: Date,
     expiresAt: Date,
 
-
-    //its for the match, if the declaration is matched with another declaration, 
+    //its for the match, if the post is matched with another post,
     //this field will contain the id of the ticket that its matching it needs to be added by Nizar and Daly
-    activeMatch: { type: Schema.Types.ObjectId, default: null }, 
+    activeMatch: { type: Schema.Types.ObjectId, default: null },
 
     isHidden: { type: Boolean, default: false },
     hiddenBy: ref("User"),
@@ -80,17 +78,16 @@ const declarationSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-
-declarationSchema.index({
+postSchema.index({
   intent: 1,
   status: 1,
   isHidden: 1,
   category: 1,
   start: -1,
 });
-declarationSchema.index({ place: 1 });
-declarationSchema.index({ user: 1, createdAt: -1 });
-declarationSchema.index({ status: 1, expiresAt: 1 });
-declarationSchema.index({ "custody.state": 1, "custody.depositDeadline": 1 });
+postSchema.index({ place: 1 });
+postSchema.index({ user: 1, createdAt: -1 });
+postSchema.index({ status: 1, expiresAt: 1 });
+postSchema.index({ "custody.state": 1, "custody.depositDeadline": 1 });
 
-export default mongoose.model("Declaration", declarationSchema);
+export default mongoose.model("Declaration", postSchema);

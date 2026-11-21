@@ -31,7 +31,7 @@ import {
   DeclarationNotFoundError,
   InvalidCategoryError,
   InvalidPlaceError,
-} from "./declarations.errors.js";
+} from "./post.errors.js";
 
 export default {
   AppError,
