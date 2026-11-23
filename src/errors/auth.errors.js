@@ -17,7 +17,7 @@ export class EmailAlreadyExistsError extends ConflictError {
 }
 
 
-export class AccountNotActiveError extends AuthentificationError {
+export class AccountNotActiveError extends AuthenticationError {
   constructor() {
     super(
       "Your account is not active. Check if you have verified your email address or Please contact support.",
