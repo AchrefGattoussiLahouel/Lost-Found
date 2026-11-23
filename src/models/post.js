@@ -49,7 +49,7 @@ const postSchema = new Schema(
     //this field will contain the id of the ticket that its matching it needs to be added by Nizar and Daly
     activeMatch: { type: Schema.Types.ObjectId, default: null },
 
-      
+    isHidden: { type: Boolean, default: false },
     hiddenBy: ref("User"),
     hiddenAt: Date,
 
