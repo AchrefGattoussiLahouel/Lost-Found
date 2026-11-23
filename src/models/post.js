@@ -1,81 +1,93 @@
-// ──────────────────────────────────────────────────────────
-// Placeholder Post model — will be replaced by Binôme 1.
-// Provides the schema that Search & Exploration depends on.
-// ──────────────────────────────────────────────────────────
-
 import mongoose from "mongoose";
+import {
+  INTENTS,
+  POST_STATUS,
+  CLOSE_REASONS,
+  CUSTODY_STATE,
+  DEPOSIT_REASONS,
+} from "../constants/post.js";
 
-const POST_INTENTS = Object.freeze({ LOST: "lost", FOUND: "found" });
-const POST_STATUSES = Object.freeze({
-    ACTIVE: "active",
-    RESOLVED: "resolved",
-    EXPIRED: "expired"
+const { Schema } = mongoose;
+const ref = (name, extra = {}) => ({
+  type: Schema.Types.ObjectId,
+  ref: name,
+  ...extra,
 });
 
-const postSchema = new mongoose.Schema(
-    {
-        intent: {
-            type: String,
-            enum: Object.values(POST_INTENTS),
-            required: true
-        },
-        category: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        title: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        description: {
-            type: String,
-            default: ""
-        },
-        zone: {
-            type: String,
-            trim: true,
-            maxlength: 100,
-            index: true
-        },
-        lat: { type: Number, default: null },
-        lng: { type: Number, default: null },
-        start: { type: Date, default: null },
-        end: { type: Date, default: null },
-        status: {
-            type: String,
-            enum: Object.values(POST_STATUSES),
-            default: POST_STATUSES.ACTIVE,
-            required: true
-        },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true
-        }
+const postSchema = new Schema(
+  {
+    intent: { type: String, enum: Object.values(INTENTS), required: true },
+    title: { type: String, required: true, trim: true, maxlength: 120 },
+    description: { type: String, default: "", trim: true, maxlength: 1000 },
+    category: ref("Category", { required: true }),
+    photos: { type: [String], default: [] },
+    secret_detail: { type: String, default: "", maxlength: 300, select: false },
+    color: { type: String, trim: true, maxlength: 20 },
+    brand: { type: String, trim: true, maxlength: 50 },
+
+    place: ref("Place", { required: true }),
+    placeDetails: { type: String, trim: true, maxlength: 200 },
+    start: { type: Date, default: null },
+    end: { type: Date, default: null },
+
+    user: ref("User", { default: null }),
+    createdBy: ref("User", { required: true }),
+    contact: { name: String, phone: String },
+    previousPost: ref("Post"),
+
+    status: {
+      type: String,
+      enum: Object.values(POST_STATUS),
+      default: POST_STATUS.ACTIVE,
+      required: true,
     },
-    {
-        timestamps: { createdAt: "created_at", updatedAt: "updated_at" },
-        versionKey: false
-    }
+    closeReason: { type: String, enum: Object.values(CLOSE_REASONS) },
+    closedAt: Date,
+    expiresAt: Date,
+
+    //its for the match, if the post is matched with another post,
+    //this field will contain the id of the ticket that its matching it needs to be added by Nizar and Daly
+    activeMatch: { type: Schema.Types.ObjectId, default: null },
+
+    isHidden: { type: Boolean, default: false },
+    hiddenBy: ref("User"),
+    hiddenAt: Date,
+
+    referenceCode: { type: String, unique: true, sparse: true },
+
+    custody: {
+      state: { type: String, enum: Object.values(CUSTODY_STATE) },
+      depositDeadline: Date,
+      depositRequiredAt: Date,
+      depositReason: { type: String, enum: Object.values(DEPOSIT_REASONS) },
+      isOverdue: { type: Boolean, default: false },
+      depositedAt: Date,
+      receivedBy: ref("User"),
+      receivedAt: Date,
+      storageSpot: { type: String, trim: true, maxlength: 100 },
+    },
+
+    restitution: {
+      returnedTo: String,
+      idChecked: Boolean,
+      notes: String,
+      handledBy: ref("User"),
+      date: Date,
+    },
+  },
+  { timestamps: true, versionKey: false },
 );
 
-// ── Indexes required by Search & Exploration ────────────────────
-// Compound index for the most common filtered query path
-postSchema.index({ intent: 1, status: 1, category: 1, start: -1 });
+postSchema.index({
+  intent: 1,
+  status: 1,
+  isHidden: 1,
+  category: 1,
+  start: -1,
+});
+postSchema.index({ place: 1 });
+postSchema.index({ user: 1, createdAt: -1 });
+postSchema.index({ status: 1, expiresAt: 1 });
+postSchema.index({ "custody.state": 1, "custody.depositDeadline": 1 });
 
-// Full-text search on title + description
-postSchema.index({ title: "text", description: "text" });
-
-// Geo bounding-box queries
-postSchema.index({ lat: 1, lng: 1 });
-
-// Sort / range on creation date
-postSchema.index({ created_at: -1 });
-
-const Post = mongoose.model("Post", postSchema);
-
-export { POST_INTENTS, POST_STATUSES };
-export default Post;
-
+export default mongoose.model("Post", postSchema);

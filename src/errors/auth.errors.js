@@ -11,9 +11,20 @@ export class EmailAlreadyExistsError extends ConflictError {
             "An account with this email already exists."
         );
 
-        this.code = "EMAIL_ALREADY_EXISTS";
-        this.messageKey = "errors.emailAlreadyExists";
-    }
+    this.code = "EMAIL_ALREADY_EXISTS";
+    this.messageKey = "errors.emailAlreadyExists";
+  }
+}
+
+
+export class AccountNotActiveError extends AuthenticationError {
+  constructor() {
+    super(
+      "Your account is not active. Check if you have verified your email address or Please contact support.",
+      "ACCOUNT_NOT_ACTIVE",
+    );
+    this.messageKey = "errors.accountNotActive";
+  }
 }
 
 export class InvalidCredentialsError extends AuthenticationError {
