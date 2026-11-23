@@ -1,62 +1,20 @@
-import { AppError } from "./AppError.js";
+import AppError from "./AppError.js";
 import ERROR_CODES from "./errorCodes.js";
 
-import {
-  BadRequestError,
-  ValidationError,
-  AuthentificationError,
-  AuthorizationError,
-  NotFoundError,
-  ConflictError,
-  PayloadTooLargeError,
-  RateLimitError,
-  InternalError,
-  DependencyError,
-  ServiceUnavailableError,
-  TimeoutError,
-} from "./http.errors.js";
+import * as httpErrors from "./http.errors.js";
+import * as authErrors from "./auth.errors.js";
+import * as postErrors from "./post.errors.js";
 
-import {
-  EmailAlreadyExistsError,
-  InvalidCredentialsError,
-  TokenMissingError,
-  TokenInvalidError,
-  TokenExpiredError,
-  InsufficientRoleError,
-  AccountNotActiveError,
-} from "./auth.errors.js";
+export { AppError, ERROR_CODES };
 
-import {
-  ContactRequiredError,
-  PostNotFoundError,
-  InvalidCategoryError,
-  InvalidPlaceError,
-} from "./post.errors.js";
+export * from "./http.errors.js";
+export * from "./auth.errors.js";
+export * from "./post.errors.js";
 
 export default {
   AppError,
   ERROR_CODES,
-  BadRequestError,
-  ValidationError,
-  AuthentificationError,
-  AuthorizationError,
-  NotFoundError,
-  ConflictError,
-  PayloadTooLargeError,
-  RateLimitError,
-  InternalError,
-  DependencyError,
-  ServiceUnavailableError,
-  TimeoutError,
-  EmailAlreadyExistsError,
-  InvalidCredentialsError,
-  TokenMissingError,
-  TokenInvalidError,
-  TokenExpiredError,
-  InsufficientRoleError,
-  AccountNotActiveError,
-  ContactRequiredError,
-  PostNotFoundError,
-  InvalidCategoryError,
-  InvalidPlaceError,
+  ...httpErrors,
+  ...authErrors,
+  ...postErrors,
 };

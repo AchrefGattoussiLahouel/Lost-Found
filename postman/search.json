@@ -1,0 +1,268 @@
+{
+    "info": {
+        "name": "Lost & Found — Search & Exploration",
+        "description": "Binôme 2 — Tests de l'endpoint GET /api/posts/search",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:5000"
+        }
+    ],
+    "item": [
+        {
+            "name": "1 — Recherche simple (1 filtre: intent)",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search?intent=lost",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search"],
+                    "query": [
+                        { "key": "intent", "value": "lost" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                            "pm.test('Has data array', () => {",
+                            "    const json = pm.response.json();",
+                            "    pm.expect(json).to.have.property('data').that.is.an('array');",
+                            "});",
+                            "pm.test('Has pagination', () => {",
+                            "    const json = pm.response.json();",
+                            "    pm.expect(json.pagination).to.have.all.keys('page','limit','total','totalPages','hasNextPage','hasPrevPage');",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2 — Recherche combinée (4 filtres)",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search?intent=found&category=clés&sort=recent&limit=10",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search"],
+                    "query": [
+                        { "key": "intent", "value": "found" },
+                        { "key": "category", "value": "clés" },
+                        { "key": "sort", "value": "recent" },
+                        { "key": "limit", "value": "10" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                            "pm.test('Limit respected', () => {",
+                            "    const json = pm.response.json();",
+                            "    pm.expect(json.data.length).to.be.at.most(10);",
+                            "    pm.expect(json.pagination.limit).to.eql(10);",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3 — 0 résultats → suggestions",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search?q=xyzinexistant123&category=fusée",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search"],
+                    "query": [
+                        { "key": "q", "value": "xyzinexistant123" },
+                        { "key": "category", "value": "fusée" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 200 even with no results', () => pm.response.to.have.status(200));",
+                            "pm.test('Empty data + suggestions', () => {",
+                            "    const json = pm.response.json();",
+                            "    pm.expect(json.data).to.be.an('array').that.is.empty;",
+                            "    pm.expect(json.suggestions).to.be.an('array').that.is.not.empty;",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4 — Validation error (400)",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search?limit=999&intent=invalid",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search"],
+                    "query": [
+                        { "key": "limit", "value": "999" },
+                        { "key": "intent", "value": "invalid" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 422 validation error', () => {",
+                            "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
+                            "});",
+                            "pm.test('Has error code', () => {",
+                            "    const json = pm.response.json();",
+                            "    pm.expect(json.error).to.have.property('code');",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5 — Page 2",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search?page=2&limit=5",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search"],
+                    "query": [
+                        { "key": "page", "value": "2" },
+                        { "key": "limit", "value": "5" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                            "pm.test('Page 2 returned', () => {",
+                            "    const json = pm.response.json();",
+                            "    pm.expect(json.pagination.page).to.eql(2);",
+                            "    pm.expect(json.pagination.hasPrevPage).to.be.true;",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6 — Tri par date (oldest)",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search?sort=oldest&limit=5",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search"],
+                    "query": [
+                        { "key": "sort", "value": "oldest" },
+                        { "key": "limit", "value": "5" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                            "pm.test('Sorted ascending', () => {",
+                            "    const json = pm.response.json();",
+                            "    if (json.data.length >= 2) {",
+                            "        const d1 = new Date(json.data[0].created_at);",
+                            "        const d2 = new Date(json.data[1].created_at);",
+                            "        pm.expect(d1.getTime()).to.be.at.most(d2.getTime());",
+                            "    }",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "7 — Recherche par rayon géographique",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search?lat=36.8065&lng=10.1815&radius=2",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search"],
+                    "query": [
+                        { "key": "lat", "value": "36.8065" },
+                        { "key": "lng", "value": "10.1815" },
+                        { "key": "radius", "value": "2" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                            "pm.test('Results have distance_km', () => {",
+                            "    const json = pm.response.json();",
+                            "    if (json.data.length > 0) {",
+                            "        pm.expect(json.data[0]).to.have.property('distance_km');",
+                            "    }",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "8 — Recherche par zone (Mall Zone)",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search?zone=Food%20Court&intent=lost",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search"],
+                    "query": [
+                        { "key": "zone", "value": "Food Court" },
+                        { "key": "intent", "value": "lost" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                            "pm.test('Results match requested zone', () => {",
+                            "    const json = pm.response.json();",
+                            "    json.data.forEach(d => {",
+                            "        pm.expect(d.zone.toLowerCase()).to.eql('food court');",
+                            "        pm.expect(d.intent).to.eql('lost');",
+                            "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
+

@@ -2,6 +2,8 @@ import express from "express";
 import errorHandler from "./middlewares/errorHandler.js";
 import authRoutes from "./routes/auth.routes.js";
 import postRoutes from "./routes/post.routes.js";
+import searchRoutes from "./routes/search.routes.js";
+
 const app = express();
 
 app.use(express.json({ limit: "10kb" }));
@@ -17,6 +19,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/post", postRoutes);
 
 // Error handler (must remain last)
+// ── Routes ──────────────────────────────────────────────────────
+app.use("/api/posts/search", searchRoutes);
+
+// ── Error handler (must be last) ────────────────────────────────
 app.use(errorHandler);
 
 export default app;

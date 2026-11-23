@@ -15,7 +15,7 @@ const JOI_ERROR_CODES = {
   "date.max": "INVALID_VALUE",
 };
 
-const validate =
+export const validate =
   (schema, source = "body") =>
   (req, res, next) => {
     const { error, value } = schema.validate(req[source], {
