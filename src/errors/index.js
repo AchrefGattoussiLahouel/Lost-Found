@@ -33,6 +33,14 @@ import {
   InvalidPlaceError,
 } from "./post.errors.js";
 
+import {
+  ReportNotFoundError,
+  CannotReportOwnPostError,
+  ReportAlreadyClosedError,
+  ReportAlreadyExistsError,
+  ReportStatusInvalidError,
+} from "./report.errors.js";
+
 export default {
   AppError,
   ERROR_CODES,
@@ -59,4 +67,9 @@ export default {
   PostNotFoundError,
   InvalidCategoryError,
   InvalidPlaceError,
+  ReportNotFoundError,
+  CannotReportOwnPostError,
+  ReportAlreadyClosedError,
+  ReportStatusInvalidError,
+  ReportAlreadyExistsError,
 };
