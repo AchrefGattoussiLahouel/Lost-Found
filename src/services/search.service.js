@@ -14,15 +14,17 @@ import { haversineKm } from "../utils/geo.js";
  * Search declarations.
  *
  * @param {object} params  Validated & sanitised query parameters
- * @returns {{ data: object[], pagination: object, suggestions: string[] }}
+ * @returns {Promise<{ data: object[], pagination: object, suggestions: string[] }>}
  */
 export const searchPosts = async (params) => {
-    const { query, projection, needsTextScore } = buildSearchQuery(params);
+    const { query, projection, needsTextScore } = await buildSearchQuery(params);
     const { skip, limit, sortObj } = paginationParams(params);
 
     // ── Run find + count in parallel ────────────────────────────
     const [docs, total] = await Promise.all([
         Post.find(query, projection)
+            .populate("category", "name description")
+            .populate("place", "name zone lat lng")
             .sort(sortObj)
             .skip(skip)
             .limit(limit)
@@ -37,9 +39,16 @@ export const searchPosts = async (params) => {
         data = docs
             .map((doc) => ({
                 ...doc,
-                distance_km: haversineKm(params.lat, params.lng, doc.lat, doc.lng)
+                distance_km:
+                    doc.place?.lat != null && doc.place?.lng != null
+                        ? haversineKm(params.lat, params.lng, doc.place.lat, doc.place.lng)
+                        : null
             }))
-            .sort((a, b) => a.distance_km - b.distance_km);
+            .sort((a, b) => {
+                const distA = a.distance_km ?? Infinity;
+                const distB = b.distance_km ?? Infinity;
+                return distA - distB;
+            });
     }
 
     // ── Build pagination envelope ───────────────────────────────
@@ -66,8 +75,8 @@ function buildSuggestions(params) {
         tips.push("Essayez sans filtre de catégorie.");
     }
 
-    if (params.zone) {
-        tips.push("Essayez sans filtre de zone.");
+    if (params.zone || params.place) {
+        tips.push("Essayez sans filtre de lieu ou de zone.");
     }
 
     if (params.from || params.to) {
@@ -93,4 +102,3 @@ function buildSuggestions(params) {
 }
 
 export default { searchPosts };
-
