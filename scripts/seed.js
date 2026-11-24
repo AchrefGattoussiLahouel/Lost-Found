@@ -10,81 +10,55 @@
 import "dotenv/config";
 import mongoose from "mongoose";
 import Post from "../src/models/post.js";
+import Category from "../src/models/category.js";
+import Place from "../src/models/place.js";
+import User from "../src/models/user.js";
+import { POST_STATUS, INTENTS } from "../src/constants/post.js";
 
-// ── Realistic seed data ─────────────────────────────────────────
+// ── Default catalog data if empty ───────────────────────────────
 
-const CATEGORIES = [
-    "téléphone", "clés", "portefeuille", "sac", "carte d'identité",
-    "lunettes", "montre", "bijoux", "vêtement", "écouteurs",
-    "ordinateur", "tablette", "parapluie", "livre", "autre"
+const DEFAULT_CATEGORIES = [
+    "Sac", "Téléphone", "Clés", "Portefeuille", "Vêtement", "Bijou",
+    "Lunettes", "Montre", "Écouteurs", "Ordinateur", "Autre"
 ];
 
-const ZONES = [
-    "Food Court",
-    "Electronics",
-    "Clothing",
-    "Cinema",
-    "Parking",
-    "Entrance A",
-    "Entrance B"
-];
-
-const LOCATIONS = [
-    { name: "Bibliothèque",    lat: 36.8065, lng: 10.1815 },
-    { name: "Cafétéria",       lat: 36.8070, lng: 10.1820 },
-    { name: "Amphithéâtre A",  lat: 36.8060, lng: 10.1810 },
-    { name: "Parking",         lat: 36.8055, lng: 10.1825 },
-    { name: "Hall principal",  lat: 36.8068, lng: 10.1808 },
-    { name: "Laboratoire",     lat: 36.8072, lng: 10.1830 },
-    { name: "Salle de sport",  lat: 36.8050, lng: 10.1800 },
-    { name: "Entrée campus",   lat: 36.8075, lng: 10.1835 }
+const DEFAULT_PLACES = [
+    { name: "Parking niveau -1", zone: "Parking", lat: 36.8055, lng: 10.1825 },
+    { name: "Parking niveau -2", zone: "Parking", lat: 36.8050, lng: 10.1820 },
+    { name: "Food court", zone: "Restauration", lat: 36.8070, lng: 10.1820 },
+    { name: "Accueil", zone: "Rez-de-chaussée", lat: 36.8068, lng: 10.1808 },
+    { name: "Entrée nord", zone: "Rez-de-chaussée", lat: 36.8075, lng: 10.1835 },
+    { name: "Entrée sud", zone: "Rez-de-chaussée", lat: 36.8060, lng: 10.1810 },
+    { name: "Cinéma", zone: "Étage 2", lat: 36.8072, lng: 10.1830 },
+    { name: "Bibliothèque", zone: "Étage 1", lat: 36.8065, lng: 10.1815 }
 ];
 
 const TITLES_LOST = [
-    "Téléphone perdu", "Clés perdues", "Portefeuille égaré",
-    "Sac oublié", "Lunettes perdues", "Montre perdue",
-    "Carte étudiante perdue", "Écouteurs perdus"
+    "Téléphone noir perdu", "Clés de maison perdues", "Portefeuille en cuir égaré",
+    "Sac à dos oublié", "Lunettes de soleil perdues", "Montre connectée perdue",
+    "Carte étudiante perdue", "Écouteurs sans fil perdus"
 ];
 
 const TITLES_FOUND = [
-    "Téléphone trouvé", "Clés trouvées", "Portefeuille trouvé",
-    "Sac trouvé", "Lunettes trouvées", "Montre trouvée",
-    "Carte étudiante trouvée", "Écouteurs trouvés"
+    "Téléphone noir trouvé", "Trousseau de clés trouvé", "Portefeuille marron trouvé",
+    "Sac à dos noir trouvé", "Lunettes trouvées", "Montre trouvée",
+    "Carte d'identité trouvée", "Boîtier d'écouteurs trouvé"
 ];
 
-const STATUSES = ["active", "active", "active", "active", "resolved", "expired"];
-
-// ── Helpers ─────────────────────────────────────────────────────
+const STATUSES = [
+    POST_STATUS.ACTIVE,
+    POST_STATUS.ACTIVE,
+    POST_STATUS.ACTIVE,
+    POST_STATUS.MATCHED,
+    POST_STATUS.CLOSED
+];
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-const randomDate = (daysBack = 90) => {
+const randomDate = (daysBack = 60) => {
     const now = Date.now();
     return new Date(now - Math.random() * daysBack * 86_400_000);
 };
-
-const fakeObjectId = () => new mongoose.Types.ObjectId();
-
-function generatePost() {
-    const intent = Math.random() < 0.5 ? "lost" : "found";
-    const loc = pick(LOCATIONS);
-    const start = randomDate();
-    const end = new Date(start.getTime() + Math.random() * 7 * 86_400_000);
-
-    return {
-        intent,
-        category: pick(CATEGORIES),
-        zone: pick(ZONES),
-        title: pick(intent === "lost" ? TITLES_LOST : TITLES_FOUND),
-        description: `Objet ${intent === "lost" ? "perdu" : "trouvé"} près de ${loc.name}.`,
-        lat: loc.lat + (Math.random() - 0.5) * 0.005,
-        lng: loc.lng + (Math.random() - 0.5) * 0.005,
-        start,
-        end,
-        status: pick(STATUSES),
-        user: fakeObjectId()
-    };
-}
 
 // ── Main ────────────────────────────────────────────────────────
 
@@ -93,10 +67,68 @@ const BATCH = 5000;
 
 async function seed() {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log(`Connected. Seeding ${COUNT} posts…`);
+    console.log(`Connected to MongoDB. Preparing catalog & dependencies…`);
+
+    // Ensure Categories exist
+    for (const name of DEFAULT_CATEGORIES) {
+        await Category.updateOne(
+            { name },
+            { $setOnInsert: { name, isActive: true } },
+            { upsert: true }
+        );
+    }
+    const categories = await Category.find().select("_id name").lean();
+
+    // Ensure Places exist
+    for (const p of DEFAULT_PLACES) {
+        await Place.updateOne(
+            { name: p.name },
+            { $setOnInsert: { ...p, isActive: true } },
+            { upsert: true }
+        );
+    }
+    const places = await Place.find().select("_id name zone lat lng").lean();
+
+    // Ensure at least one system user exists for createdBy
+    let user = await User.findOne().select("_id").lean();
+    if (!user) {
+        user = await User.create({
+            firstName: "Système",
+            lastName: "Test",
+            email: "system@lostfound.local",
+            password: "Password123!",
+            role: "membre",
+            status: "active"
+        });
+    }
+
+    console.log(`Seeding ${COUNT} posts…`);
 
     // Drop existing posts
     await Post.deleteMany({});
+
+    function generatePost() {
+        const intent = Math.random() < 0.5 ? INTENTS.LOST : INTENTS.FOUND;
+        const place = pick(places);
+        const cat = pick(categories);
+        const start = randomDate();
+        const end = new Date(start.getTime() + Math.random() * 5 * 86_400_000);
+
+        return {
+            intent,
+            title: pick(intent === INTENTS.LOST ? TITLES_LOST : TITLES_FOUND),
+            description: `Objet ${intent === INTENTS.LOST ? "perdu" : "trouvé"} à proximité de ${place.name}.`,
+            category: cat._id,
+            place: place._id,
+            placeDetails: "Près de l'entrée principale",
+            start,
+            end,
+            status: pick(STATUSES),
+            isHidden: false,
+            createdBy: user._id,
+            user: user._id
+        };
+    }
 
     let inserted = 0;
 
@@ -108,7 +140,7 @@ async function seed() {
         process.stdout.write(`  ${inserted} / ${COUNT}\r`);
     }
 
-    console.log(`\n✅  ${COUNT} posts inserted.`);
+    console.log(`\n✅  ${COUNT} posts inserted successfully.`);
     await mongoose.disconnect();
 }
 
@@ -116,4 +148,3 @@ seed().catch((err) => {
     console.error("Seed failed:", err);
     process.exit(1);
 });
-

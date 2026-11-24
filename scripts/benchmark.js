@@ -10,48 +10,8 @@
 import "dotenv/config";
 import mongoose from "mongoose";
 import Post from "../src/models/post.js";
-
-// ── Test queries ────────────────────────────────────────────────
-
-const QUERIES = [
-    {
-        name: "1. intent + status (compound index)",
-        filter: { intent: "lost", status: "active" }
-    },
-    {
-        name: "2. Full-text search on title/description",
-        filter: { $text: { $search: "téléphone perdu" } }
-    },
-    {
-        name: "3. Geo bounding box (lat/lng)",
-        filter: {
-            lat: { $gte: 36.804, $lte: 36.808 },
-            lng: { $gte: 10.179, $lte: 10.183 }
-        }
-    },
-    {
-        name: "4. Combined: intent + status + category + date",
-        filter: {
-            intent: "found",
-            status: "active",
-            category: "clés",
-            start: { $lte: new Date() }
-        }
-    },
-    {
-        name: "5. Sort by created_at (index {created_at: -1})",
-        filter: { status: "active" },
-        sort: { created_at: -1 },
-        limit: 20
-    },
-    {
-        name: "6. Filter by zone (index {zone: 1})",
-        filter: { zone: "Food Court", status: "active" },
-        limit: 20
-    }
-];
-
-// ── Helpers ─────────────────────────────────────────────────────
+import Category from "../src/models/category.js";
+import Place from "../src/models/place.js";
 
 async function runQuery(q) {
     let cursor = Post.find(q.filter);
@@ -79,43 +39,76 @@ async function explainQuery(q) {
         executionTimeMs: exec.executionTimeMillis,
         totalDocsExamined: exec.totalDocsExamined,
         totalKeysExamined: exec.totalKeysExamined,
-        stage: exec.executionStages?.stage
-            || exec.winningPlan?.stage
-            || "N/A"
+        stage:
+            exec.executionStages?.stage ||
+            exec.winningPlan?.stage ||
+            "N/A"
     };
 }
-
-// ── Main ────────────────────────────────────────────────────────
 
 async function benchmark() {
     await mongoose.connect(process.env.MONGO_URI);
 
     const count = await Post.countDocuments();
-    console.log(`\n📊  Benchmark on ${count} posts\n`);
+    console.log(`\n📊  Benchmark sur ${count} déclarations (Post)\n`);
     console.log("=".repeat(70));
+
+    const sampleCategory = await Category.findOne().select("_id").lean();
+    const samplePlace = await Place.findOne().select("_id").lean();
+
+    const QUERIES = [
+        {
+            name: "1. Intent + Status + isHidden (Compound Index)",
+            filter: { intent: "lost", status: "active", isHidden: false }
+        },
+        {
+            name: "2. Full-text search (Index textuel sur title & description)",
+            filter: { $text: { $search: "téléphone noir" } }
+        },
+        {
+            name: "3. Filtrage par Place (Index { place: 1 })",
+            filter: { place: samplePlace?._id }
+        },
+        {
+            name: "4. Index combiné : Intent + Status + Category + Date",
+            filter: {
+                intent: "found",
+                status: "active",
+                isHidden: false,
+                ...(sampleCategory ? { category: sampleCategory._id } : {}),
+                start: { $lte: new Date() }
+            }
+        },
+        {
+            name: "5. Tri par createdAt (Index { user: 1, createdAt: -1 } / scan)",
+            filter: { status: "active" },
+            sort: { createdAt: -1 },
+            limit: 20
+        }
+    ];
 
     for (const q of QUERIES) {
         console.log(`\n▸ ${q.name}`);
 
         // Timing
         const ms = await runQuery(q);
-        console.log(`  Time:  ${ms} ms`);
+        console.log(`  Temps d'exécution : ${ms} ms`);
 
         // Explain
         try {
             const info = await explainQuery(q);
-            console.log(`  Stage: ${info.stage}`);
-            console.log(`  Docs examined:  ${info.totalDocsExamined}`);
-            console.log(`  Keys examined:  ${info.totalKeysExamined}`);
-            console.log(`  Execution time: ${info.executionTimeMs} ms`);
+            console.log(`  Étape (Stage)    : ${info.stage}`);
+            console.log(`  Docs examinés    : ${info.totalDocsExamined}`);
+            console.log(`  Clés examinées   : ${info.totalKeysExamined}`);
+            console.log(`  Durée Mongo      : ${info.executionTimeMs} ms`);
 
             if (info.stage === "COLLSCAN") {
-                console.log("  ⚠️  COLLSCAN detected — missing index!");
+                console.log("  ⚠️  COLLSCAN détecté — index manquant !");
             } else {
-                console.log("  ✅  Index used (IXSCAN or FETCH)");
+                console.log("  ✅  Index utilisé (IXSCAN / TEXT / FETCH)");
             }
         } catch (err) {
-            console.log(`  explain() error: ${err.message}`);
+            console.log(`  explain() erreur : ${err.message}`);
         }
     }
 
@@ -127,4 +120,3 @@ benchmark().catch((err) => {
     console.error("Benchmark failed:", err);
     process.exit(1);
 });
-
