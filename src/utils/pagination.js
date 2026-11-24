@@ -10,9 +10,9 @@ export const paginationParams = ({ page, limit, sort }) => {
     const skip = (page - 1) * limit;
 
     const SORT_MAP = {
-        recent: { created_at: -1 },
-        oldest: { created_at: 1 },
-        relevance: { score: { $meta: "textScore" }, created_at: -1 }
+        recent: { createdAt: -1 },
+        oldest: { createdAt: 1 },
+        relevance: { score: { $meta: "textScore" }, createdAt: -1 }
     };
 
     return {

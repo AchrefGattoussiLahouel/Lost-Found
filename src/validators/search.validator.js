@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { POST_STATUS } from "../constants/post.js";
 
 const searchSchema = Joi.object({
     q: Joi.string()
@@ -20,6 +21,11 @@ const searchSchema = Joi.object({
         .trim()
         .max(100)
         .allow("")
+        .optional(),
+
+    place: Joi.string()
+        .trim()
+        .max(100)
         .optional(),
 
     lat: Joi.number()
@@ -48,8 +54,8 @@ const searchSchema = Joi.object({
         .optional(),
 
     status: Joi.string()
-        .valid("active", "resolved", "expired")
-        .default("active")
+        .valid(...Object.values(POST_STATUS))
+        .default(POST_STATUS.ACTIVE)
         .optional(),
 
     sort: Joi.string()
