@@ -85,6 +85,7 @@ postSchema.index({
   category: 1,
   start: -1,
 });
+postSchema.index({ title: "text", description: "text" });
 postSchema.index({ place: 1 });
 postSchema.index({ user: 1, createdAt: -1 });
 postSchema.index({ status: 1, expiresAt: 1 });
