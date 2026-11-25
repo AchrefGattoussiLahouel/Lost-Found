@@ -1,13 +1,62 @@
+import { AppError } from "./AppError.js";
+import ERROR_CODES from "./errorCodes.js";
 
-const AppError = require("./AppError");
-const ERROR_CODES = require("./errorCodes");
+import {
+  BadRequestError,
+  ValidationError,
+  AuthentificationError,
+  AuthorizationError,
+  NotFoundError,
+  ConflictError,
+  PayloadTooLargeError,
+  RateLimitError,
+  InternalError,
+  DependencyError,
+  ServiceUnavailableError,
+  TimeoutError,
+} from "./http.errors.js";
 
-const httpErrors = require("./http.errors");
-const authErrors = require("./auth.errors");
+import {
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+  TokenMissingError,
+  TokenInvalidError,
+  TokenExpiredError,
+  InsufficientRoleError,
+  AccountNotActiveError,
+} from "./auth.errors.js";
 
-module.exports = {
-    AppError,
-    ERROR_CODES,
-    ...httpErrors,
-    ...authErrors
+import {
+  ContactRequiredError,
+  PostNotFoundError,
+  InvalidCategoryError,
+  InvalidPlaceError,
+} from "./post.errors.js";
+
+export default {
+  AppError,
+  ERROR_CODES,
+  BadRequestError,
+  ValidationError,
+  AuthentificationError,
+  AuthorizationError,
+  NotFoundError,
+  ConflictError,
+  PayloadTooLargeError,
+  RateLimitError,
+  InternalError,
+  DependencyError,
+  ServiceUnavailableError,
+  TimeoutError,
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+  TokenMissingError,
+  TokenInvalidError,
+  TokenExpiredError,
+  InsufficientRoleError,
+  AccountNotActiveError,
+  ContactRequiredError,
+  PostNotFoundError,
+  InvalidCategoryError,
+  InvalidPlaceError,
 };
