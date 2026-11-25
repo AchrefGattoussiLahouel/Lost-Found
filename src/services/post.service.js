@@ -10,6 +10,7 @@ import {
   DEPOSIT_WINDOW_MINUTES,
 } from "../constants/post.js";
 import { isStaff, canView, present } from "../rules/post.rules.js";
+import { getSkip, buildMeta } from "../utils/pagination.js";
 
 const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
@@ -86,7 +87,6 @@ const getById = async (id, actor) => {
   const query = Post.findById(id);
   if (isStaff(actor)) query.select("+secret_detail");
   const post = await populate(query);
-
   if (!post || !canView(actor, post)) {
     throw new Errors.PostNotFoundError();
   }
@@ -99,7 +99,7 @@ const mine = async (actor, { page = 1, limit = 10, intent, status } = {}) => {
   if (intent) filter.intent = intent;
   if (status) filter.status = status;
 
-  const skip = (page - 1) * limit;
+  const skip = getSkip(page, limit);
   const [items, total] = await Promise.all([
     populate(Post.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit)),
     Post.countDocuments(filter),
@@ -107,7 +107,7 @@ const mine = async (actor, { page = 1, limit = 10, intent, status } = {}) => {
 
   return {
     items: items.map((d) => present(actor, d)),
-    meta: { page, limit, total, pages: Math.ceil(total / limit) },
+    meta: buildMeta(page, limit, total),
   };
 };
 
@@ -124,7 +124,7 @@ const listAll = async (actor, filters = {}) => {
   if (intent) filter.intent = intent;
   if (status) filter.status = status;
 
-  const skip = (page - 1) * limit;
+  const skip = getSkip(page, limit);
 
   const [items, total] = await Promise.all([
     populate(Post.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit)),
@@ -133,12 +133,7 @@ const listAll = async (actor, filters = {}) => {
 
   return {
     items: items.map((d) => present(actor, d)),
-    meta: {
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
+    meta: buildMeta(page, limit, total),
   };
 };
 
@@ -213,4 +208,45 @@ const update = async (id, data, actor) => {
   return getById(post._id, actor);
 };
 
-export default { create, getById, mine, listAll, update };
+const getTrash = async (actor, { page = 1, limit = 10 }) => {
+  const filter = { _id: actor, isDeleted: true };
+  const skip = getSkip(page, limit);
+  const [items, total] = await Promise.all([
+    populate(Post.find(filter)).skip(skip).limit(limit),
+    Post.countDocuments(filter),
+  ]);
+
+  const posts = items.map((p) => present(actor, p));
+
+  return {
+    data: posts,
+    meta: buildMeta(page, limit, total),
+  };
+};
+
+const deleteById = async (actor, id) => {
+  const post = await Post.findById(id);
+  if (!post || !canView(actor, post)) {
+    throw new Errors.PostNotFoundError();
+  }
+  if (post.isDeleted) {
+    throw new Errors.ConflictError("Post already deleted.");
+  }
+
+  post.isHidden = true;
+  post.isDeleted = true;
+  post.deletedAt = new Date();
+  post.deletedBy = actor._id;
+
+  await post.save();
+};
+
+export default {
+  create,
+  getById,
+  mine,
+  listAll,
+  update,
+  getTrash,
+  deleteById,
+};

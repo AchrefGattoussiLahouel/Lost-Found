@@ -29,4 +29,14 @@ const mine = async (req, res) => {
   return res.status(200).json({ data });
 };
 
-export default { create, getById, listAll, mine, update };
+const getTrash = async (req, res) => {
+  const data = await postService.getTrash(req.user, req.validated.query);
+  return res.status(200).json({ data });
+};
+
+const deleteById = async (req, res) => {
+  await postService.deleteById(req.user, req.validated.params.id);
+  return res.status(200).json({ message: "Post deleted successfully." });
+};
+
+export default { create, getById, listAll, mine, update, getTrash, deleteById };
