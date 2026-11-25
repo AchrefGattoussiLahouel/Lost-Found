@@ -1,4 +1,4 @@
-import { ROLES } from "../constants/user.js";
+import { USER_ROLES } from "../constants/user.js";
 import Errors from "../errors/index.js";
 
 export const TRANSITIONS = {
@@ -8,7 +8,7 @@ export const TRANSITIONS = {
 };
 
 export const isStaff = (user) =>
-  [ROLES.PERSONNEL, ROLES.ADMIN].includes(user.role);
+  [USER_ROLES.PERSONNEL, USER_ROLES.ADMIN].includes(user.role);
 
 export const isOwner = (user, d) => d.user?.toString() === user._id.toString();
 

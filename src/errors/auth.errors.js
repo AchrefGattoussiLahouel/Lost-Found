@@ -1,21 +1,17 @@
 import {
-    AuthenticationError,
-    AuthorizationError,
-    ConflictError
+  AuthenticationError,
+  AuthorizationError,
+  ConflictError,
 } from "./http.errors.js";
 
 export class EmailAlreadyExistsError extends ConflictError {
-    constructor() {
-        super(
-            { field: "email" },
-            "An account with this email already exists."
-        );
+  constructor() {
+    super({ field: "email" }, "An account with this email already exists.");
 
     this.code = "EMAIL_ALREADY_EXISTS";
     this.messageKey = "errors.emailAlreadyExists";
   }
 }
-
 
 export class AccountNotActiveError extends AuthenticationError {
   constructor() {
@@ -28,46 +24,68 @@ export class AccountNotActiveError extends AuthenticationError {
 }
 
 export class InvalidCredentialsError extends AuthenticationError {
-    constructor() {
-        super("Invalid email or password.", "INVALID_CREDENTIALS");
-        this.messageKey = "errors.invalidCredentials";
-    }
+  constructor() {
+    super("Invalid email or password.", "INVALID_CREDENTIALS");
+    this.messageKey = "errors.invalidCredentials";
+  }
 }
 
 export class TokenMissingError extends AuthenticationError {
-    constructor() {
-        super("Authentication token is required.", "TOKEN_MISSING");
-        this.messageKey = "errors.tokenMissing";
-    }
+  constructor() {
+    super("Authentication token is required.", "TOKEN_MISSING");
+    this.messageKey = "errors.tokenMissing";
+  }
 }
 
 export class TokenInvalidError extends AuthenticationError {
-    constructor() {
-        super("Authentication token is invalid.", "TOKEN_INVALID");
-        this.messageKey = "errors.tokenInvalid";
-    }
+  constructor() {
+    super("Authentication token is invalid.", "TOKEN_INVALID");
+    this.messageKey = "errors.tokenInvalid";
+  }
 }
 
 export class TokenExpiredError extends AuthenticationError {
-    constructor() {
-        super("Authentication token has expired.", "TOKEN_EXPIRED");
-        this.messageKey = "errors.tokenExpired";
-    }
+  constructor() {
+    super("Authentication token has expired.", "TOKEN_EXPIRED");
+    this.messageKey = "errors.tokenExpired";
+  }
 }
 
 export class InsufficientRoleError extends AuthorizationError {
-    constructor() {
-        super("You do not have permission to access this resource.");
-        this.code = "INSUFFICIENT_ROLE";
-        this.messageKey = "errors.insufficientRole";
-    }
+  constructor() {
+    super("You do not have permission to access this resource.");
+    this.code = "INSUFFICIENT_ROLE";
+    this.messageKey = "errors.insufficientRole";
+  }
 }
 
-export default {
-    EmailAlreadyExistsError,
-    InvalidCredentialsError,
-    TokenMissingError,
-    TokenInvalidError,
-    TokenExpiredError,
-    InsufficientRoleError
+class AccountNotActiveError extends AuthentificationError {
+  constructor() {
+    super(
+      "Your account is not active. Check if you have verified your email address or Please contact support.",
+      "ACCOUNT_NOT_ACTIVE",
+    );
+    this.messageKey = "errors.accountNotActive";
+  }
+}
+
+class AccountSuspendedError extends AuthentificationError {
+  constructor() {
+    super(
+      "Your account is suspended due to policy violations. Please contact support for more information.",
+      "ACCOUNT_SUSPENDED",
+    );
+    this.messageKey = "errors.accountSuspended";
+  }
+}
+
+export {
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+  TokenMissingError,
+  TokenInvalidError,
+  TokenExpiredError,
+  InsufficientRoleError,
+  AccountNotActiveError,
+  AccountSuspendedError,
 };

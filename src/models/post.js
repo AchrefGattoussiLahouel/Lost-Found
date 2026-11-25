@@ -53,6 +53,10 @@ const postSchema = new Schema(
     hiddenBy: ref("User"),
     hiddenAt: Date,
 
+    isDeleted: { type: Boolean, default: false },
+    deletedBy: ref("User"),
+    deletedAt: Date,
+
     referenceCode: { type: String, unique: true, sparse: true },
 
     custody: {

@@ -42,9 +42,20 @@ class ContactRequiredError extends AppError {
   }
 }
 
+class InvalidPostStatusError extends AppError {
+  constructor() {
+    super({
+      status: 422,
+      code: "INVALID_POST_STATUS",
+      message: "Invalid post status.",
+    });
+  }
+}
+
 export {
   PostNotFoundError,
   InvalidCategoryError,
   InvalidPlaceError,
   ContactRequiredError,
+  InvalidPostStatusError,
 };
