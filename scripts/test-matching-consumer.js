@@ -2,8 +2,8 @@ import "dotenv/config";
 import {
   connectRabbitMQ,
   closeRabbitMQ,
-} from "../src/rabbitmq/rabbitmq.connection.js";
-import { startMatchingConsumer } from "../src/rabbitmq/matching.consumer.js";
+} from "../src/queue/rabbitmq.connection.js";
+import { startMatchingConsumer } from "../src/queue/matching.consumer.js";
 
 try {
   await connectRabbitMQ();
