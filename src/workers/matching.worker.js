@@ -1,4 +1,5 @@
 import "dotenv/config";
+import connectDB from "../config/db.js";
 import {
   connectRabbitMQ,
   closeRabbitMQ,
@@ -19,6 +20,7 @@ process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 try {
+  await connectDB();
   await connectRabbitMQ();
   await startMatchingConsumer(processPostCreated);
   console.info("[Matching Worker] started");
