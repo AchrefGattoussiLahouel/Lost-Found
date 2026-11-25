@@ -14,7 +14,9 @@
     "dev": "nodemon src/server.js",
     "worker:matching": "node src/workers/matching.worker.js",
     "test:matching:consumer": "node scripts/test-matching-consumer.js",
-    "test:matching:publisher": "node scripts/test-matching-publisher.js"
+    "test:matching:publisher": "node scripts/test-matching-publisher.js",
+    "test:matching:flow": "node scripts/test-matching-flow.js",
+    "test:matching:direct": "node scripts/test-matching-direct.js"
   },
   "repository": {
     "type": "git",
@@ -28,7 +30,7 @@
   },
   "homepage": "https://github.com/AchrefGattoussiLahouel/Lost-Found#readme",
   "dependencies": {
-    "@huggingface/transformers": "^4.3.2",
+    "@huggingface/transformers": "^3.8.1",
     "amqplib": "^2.4.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
