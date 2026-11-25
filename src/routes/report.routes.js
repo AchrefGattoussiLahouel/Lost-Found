@@ -4,7 +4,7 @@ import reportController from "../controllers/report.controller.js";
 import validate from "../middlewares/validate.js";
 import Authmiddleware from "../middlewares/auth.middleware.js";
 import Schema from "../validators/report.validator.js";
-import { ROLES } from "../constants/user.js";
+import { USER_ROLES } from "../constants/user.js";
 
 const router = express.Router();
 
@@ -20,21 +20,21 @@ router.get(
 
 router.get(
   "/",
-  Authmiddleware.authorize(ROLES.ADMIN),
+  Authmiddleware.authorize(USER_ROLES.ADMIN),
   validate(Schema.listReportsSchema, "query"),
   reportController.list,
 );
 
 router.get(
   "/:id",
-  Authmiddleware.authorize(ROLES.ADMIN),
+  Authmiddleware.authorize(USER_ROLES.ADMIN),
   validate(Schema.getReportByIdSchema, "params"),
   reportController.getById,
 );
 
 router.patch(
   "/:id",
-  Authmiddleware.authorize(ROLES.ADMIN),
+  Authmiddleware.authorize(USER_ROLES.ADMIN),
   validate(Schema.getReportByIdSchema, "params"),
   validate(Schema.processReportSchema),
   reportController.process,

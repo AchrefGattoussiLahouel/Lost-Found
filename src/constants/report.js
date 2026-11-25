@@ -21,6 +21,6 @@ export const REPORT_PENDING_STATUSES = Object.freeze([
 
 export const REPORT_ACTION = Object.freeze({
   NONE: "none",
-  HIDE_DECLARATION: "hide_declaration",
-  DELETE_DECLARATION: "delete_declaration",
+  HIDE_POST: "hide_post",
+  DELETE_POST: "delete_post",
 });

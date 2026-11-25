@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { STATUS } from "../constants/user.js";
+import { USER_STATUS } from "../constants/user.js";
 import User from "../models/user.js";
 
 import Errors from "../errors/index.js";
@@ -31,7 +31,7 @@ const authenticate = async (req, res, next) => {
       throw new Errors.TokenInvalidError();
     }
 
-    if (user.status !== STATUS.ACTIVE) {
+    if (user.status !== USER_STATUS.ACTIVE) {
       throw new Errors.AccountNotActiveError();
     }
 
