@@ -10,6 +10,7 @@ import {
   DEPOSIT_WINDOW_MINUTES,
 } from "../constants/post.js";
 import { isStaff, canView, present } from "../rules/post.rules.js";
+import { publishPostCreated } from "../queue/matching.publisher.js";
 
 const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
@@ -81,6 +82,11 @@ const create = async (data, actor) => {
   }
 
   const created = await Post.create(doc);
+
+  if (created.intent === INTENTS.LOST) {
+    await publishPostCreated(created);
+  }
+
   return getById(created._id, actor);
 };
 // search for a post by its id for the owner or the staff
@@ -94,6 +100,17 @@ const getById = async (id, actor) => {
   }
   return present(actor, post);
 };
+
+// Internal lookup for the matching worker.
+const findById = async (id) => {
+  const post = await populate(Post.findById(id));
+  if (!post) throw new Errors.PostNotFoundError();
+  return post;
+};
+
+// Search for active posts with the opposite intent.
+const findByIntent = async (intent) =>
+  populate(Post.find({ intent, status: "active", isHidden: false }));
 
 // List post created by or for the actor either the staff or the owner of the post
 const mine = async (actor, { page = 1, limit = 10, intent, status } = {}) => {
@@ -144,4 +161,4 @@ const listAll = async (actor, filters = {}) => {
   };
 };
 
-export default { create, getById, mine, listAll };
+export default { create, getById, mine, listAll, findById, findByIntent };
