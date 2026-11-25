@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.js";
-import { ROLES } from "../constants/user.js";
-import { STATUS } from "../constants/user.js";
+import { USER_ROLES } from "../constants/user.js";
+import { USER_STATUS } from "../constants/user.js";
 import generateToken from "../utils/jwt.js";
 import Errors from "../errors/index.js";
 
@@ -31,8 +31,8 @@ const register = async (userData) => {
     email: userData.email,
     password: hashedPassword,
     phone: userData.phone || null,
-    role: ROLES.MEMBRE,
-    status: STATUS.PENDING,
+    role: USER_ROLES.MEMBRE,
+    status: USER_STATUS.PENDING,
   });
 
   const token = generateToken(user._id);
@@ -59,7 +59,9 @@ const login = async ({ email, password }) => {
     throw new Errors.InvalidCredentialsError();
   }
 
-  if (status !== STATUS.ACTIVE) {
+  if (status === USER_STATUS.BANNED) {
+    throw new Errors.AccountSuspendedError();
+  } else if (status !== USER_STATUS.ACTIVE) {
     throw new Errors.AccountNotActiveError();
   }
 

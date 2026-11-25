@@ -24,6 +24,7 @@ import {
   TokenExpiredError,
   InsufficientRoleError,
   AccountNotActiveError,
+  AccountSuspendedError,
 } from "./auth.errors.js";
 
 import {
@@ -31,6 +32,7 @@ import {
   PostNotFoundError,
   InvalidCategoryError,
   InvalidPlaceError,
+  InvalidPostStatusError,
 } from "./post.errors.js";
 
 import {
@@ -63,10 +65,12 @@ export default {
   TokenExpiredError,
   InsufficientRoleError,
   AccountNotActiveError,
+  AccountSuspendedError,
   ContactRequiredError,
   PostNotFoundError,
   InvalidCategoryError,
   InvalidPlaceError,
+  InvalidPostStatusError,
   ReportNotFoundError,
   CannotReportOwnPostError,
   ReportAlreadyClosedError,

@@ -58,7 +58,18 @@ class AccountNotActiveError extends AuthentificationError {
     this.messageKey = "errors.accountNotActive";
   }
 }
-export  {
+
+class AccountSuspendedError extends AuthentificationError {
+  constructor() {
+    super(
+      "Your account is suspended due to policy violations. Please contact support for more information.",
+      "ACCOUNT_SUSPENDED",
+    );
+    this.messageKey = "errors.accountSuspended";
+  }
+}
+
+export {
   EmailAlreadyExistsError,
   InvalidCredentialsError,
   TokenMissingError,
@@ -66,4 +77,5 @@ export  {
   TokenExpiredError,
   InsufficientRoleError,
   AccountNotActiveError,
+  AccountSuspendedError,
 };
