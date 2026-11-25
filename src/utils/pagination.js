@@ -1,12 +1,4 @@
 export const getSkip = (page, limit) => (page - 1) * limit;
-export function buildMeta(page, limit, total) {
-  return {
-    page,
-    limit,
-    total,
-    pages: Math.ceil(total / limit),
-  };
-}
 /**
  * pagination.js — Compute skip, sort, and build the pagination envelope.
  */
@@ -16,7 +8,7 @@ export function buildMeta(page, limit, total) {
  * @returns {{ skip: number, limit: number, sortObj: object }}
  */
 export const paginationParams = ({ page, limit, sort }) => {
-  const skip = (page - 1) * limit;
+  const skip = getSkip(page, limit);
 
   const SORT_MAP = {
     recent: { createdAt: -1 },

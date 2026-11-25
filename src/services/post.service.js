@@ -10,7 +10,7 @@ import {
   DEPOSIT_WINDOW_MINUTES,
 } from "../constants/post.js";
 import { isStaff, canView, present } from "../rules/post.rules.js";
-import { getSkip, buildMeta } from "../utils/pagination.js";
+import { getSkip, paginationMeta } from "../utils/pagination.js";
 
 const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
@@ -107,7 +107,7 @@ const mine = async (actor, { page = 1, limit = 10, intent, status } = {}) => {
 
   return {
     items: items.map((d) => present(actor, d)),
-    meta: buildMeta(page, limit, total),
+    meta: paginationMeta({ page, limit, total }),
   };
 };
 
@@ -133,7 +133,7 @@ const listAll = async (actor, filters = {}) => {
 
   return {
     items: items.map((d) => present(actor, d)),
-    meta: buildMeta(page, limit, total),
+    meta: paginationMeta({ page, limit, total }),
   };
 };
 
@@ -220,7 +220,7 @@ const getTrash = async (actor, { page = 1, limit = 10 }) => {
 
   return {
     data: posts,
-    meta: buildMeta(page, limit, total),
+    meta: paginationMeta({ page, limit, total }),
   };
 };
 

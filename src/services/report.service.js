@@ -3,7 +3,7 @@ import postSchema from "../models/post.js";
 import Errors from "../errors/index.js";
 
 import { REPORT_STATUS, REPORT_PENDING_STATUSES } from "../constants/report.js";
-import { getSkip, buildMeta } from "../utils/pagination.js";
+import { getSkip, paginationMeta } from "../utils/pagination.js";
 
 const create = async (reporter, { post, reason, description }) => {
   const target = await postSchema.findById(post);
@@ -51,7 +51,7 @@ const listMine = async (reporterId, { page, limit }) => {
 
   return {
     items,
-    meta: buildMeta(page, limit, total),
+    meta: paginationMeta({ page, limit, total }),
   };
 };
 
@@ -89,7 +89,7 @@ const list = async ({ page, limit, status, reason, post, sort }) => {
 
   return {
     items,
-    meta: buildMeta(page, limit, total),
+    meta: paginationMeta({ page, limit, total }),
   };
 };
 

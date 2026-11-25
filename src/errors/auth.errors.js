@@ -4,7 +4,7 @@ import {
   ConflictError,
 } from "./http.errors.js";
 
-export class EmailAlreadyExistsError extends ConflictError {
+class EmailAlreadyExistsError extends ConflictError {
   constructor() {
     super({ field: "email" }, "An account with this email already exists.");
 
@@ -13,45 +13,35 @@ export class EmailAlreadyExistsError extends ConflictError {
   }
 }
 
-export class AccountNotActiveError extends AuthenticationError {
-  constructor() {
-    super(
-      "Your account is not active. Check if you have verified your email address or Please contact support.",
-      "ACCOUNT_NOT_ACTIVE",
-    );
-    this.messageKey = "errors.accountNotActive";
-  }
-}
-
-export class InvalidCredentialsError extends AuthenticationError {
+class InvalidCredentialsError extends AuthenticationError {
   constructor() {
     super("Invalid email or password.", "INVALID_CREDENTIALS");
     this.messageKey = "errors.invalidCredentials";
   }
 }
 
-export class TokenMissingError extends AuthenticationError {
+class TokenMissingError extends AuthenticationError {
   constructor() {
     super("Authentication token is required.", "TOKEN_MISSING");
     this.messageKey = "errors.tokenMissing";
   }
 }
 
-export class TokenInvalidError extends AuthenticationError {
+class TokenInvalidError extends AuthenticationError {
   constructor() {
     super("Authentication token is invalid.", "TOKEN_INVALID");
     this.messageKey = "errors.tokenInvalid";
   }
 }
 
-export class TokenExpiredError extends AuthenticationError {
+class TokenExpiredError extends AuthenticationError {
   constructor() {
     super("Authentication token has expired.", "TOKEN_EXPIRED");
     this.messageKey = "errors.tokenExpired";
   }
 }
 
-export class InsufficientRoleError extends AuthorizationError {
+class InsufficientRoleError extends AuthorizationError {
   constructor() {
     super("You do not have permission to access this resource.");
     this.code = "INSUFFICIENT_ROLE";
@@ -59,7 +49,7 @@ export class InsufficientRoleError extends AuthorizationError {
   }
 }
 
-class AccountNotActiveError extends AuthentificationError {
+class AccountNotActiveError extends AuthenticationError {
   constructor() {
     super(
       "Your account is not active. Check if you have verified your email address or Please contact support.",
@@ -69,7 +59,7 @@ class AccountNotActiveError extends AuthentificationError {
   }
 }
 
-class AccountSuspendedError extends AuthentificationError {
+class AccountSuspendedError extends AuthenticationError {
   constructor() {
     super(
       "Your account is suspended due to policy violations. Please contact support for more information.",
