@@ -48,6 +48,13 @@ const userSchema = new mongoose.Schema(
       default: USER_STATUS.PENDING,
       required: true,
     },
+    bannedAt: { type: Date, default: null },
+    bannedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    banReason: { type: String, trim: true, maxlength: 500, default: null },
   },
   {
     timestamps: true,

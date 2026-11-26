@@ -82,3 +82,26 @@ export const deletePersonnel = async (req, res, next) => {
         next(error);
     }
 };
+export const banUser = async (req, res, next) => {
+    try {
+        const user = await userService.banUser(
+            req.validated.params.id,
+            req.user,
+            req.validated.body.reason
+        );
+
+        res.status(200).json({ message: "User banned successfully", data: user });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const unbanUser = async (req, res, next) => {
+    try {
+        const user = await userService.unbanUser(req.validated.params.id);
+
+        res.status(200).json({ message: "User unbanned successfully", data: user });
+    } catch (error) {
+        next(error);
+    }
+};

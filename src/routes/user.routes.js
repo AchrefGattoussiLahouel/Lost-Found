@@ -15,6 +15,7 @@ import {
     createPersonnelSchema,
     updatePersonnelSchema,
     userIdSchema,
+    banUserSchema,
 } from "../validators/user.validator.js";
 
 import { USER_ROLES } from "../constants/user.js";
@@ -62,5 +63,18 @@ router.delete(
     validate(userIdSchema, "params"),
     userController.deletePersonnel
 );
+router.patch(
+    "/:id/ban",
+    authorize(ROLES.ADMIN, ROLES.PERSONNEL),
+    validate(userIdSchema, "params"),
+    validate(banUserSchema),
+    userController.banUser
+);
 
+router.patch(
+    "/:id/unban",
+    authorize(ROLES.ADMIN, ROLES.PERSONNEL),
+    validate(userIdSchema, "params"),
+    userController.unbanUser
+);
 export default router;
