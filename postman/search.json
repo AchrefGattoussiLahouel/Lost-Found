@@ -7,7 +7,7 @@
     "variable": [
         {
             "key": "baseUrl",
-            "value": "http://localhost:5000"
+            "value": "http://localhost:3000"
         }
     ],
     "item": [
@@ -257,6 +257,39 @@
                             "        pm.expect(d.zone.toLowerCase()).to.eql('food court');",
                             "        pm.expect(d.intent).to.eql('lost');",
                             "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "9 — Autocomplétion instantanée (/autocomplete)",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "{{baseUrl}}/api/posts/search/autocomplete?q=tél&limit=5",
+                    "host": ["{{baseUrl}}"],
+                    "path": ["api", "posts", "search", "autocomplete"],
+                    "query": [
+                        { "key": "q", "value": "tél" },
+                        { "key": "limit", "value": "5" }
+                    ]
+                }
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                            "pm.test('Has suggestions object with posts, categories and places', () => {",
+                            "    const json = pm.response.json();",
+                            "    pm.expect(json).to.have.property('query');",
+                            "    pm.expect(json).to.have.property('suggestions');",
+                            "    pm.expect(json.suggestions).to.have.property('posts').that.is.an('array');",
+                            "    pm.expect(json.suggestions).to.have.property('categories').that.is.an('array');",
+                            "    pm.expect(json.suggestions).to.have.property('places').that.is.an('array');",
                             "});"
                         ]
                     }

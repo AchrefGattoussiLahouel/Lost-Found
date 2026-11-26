@@ -135,7 +135,7 @@ Mesure les temps d'exécution et extrait les statistiques réelles d'exécution 
 
 ## 7. Collection Postman
 
-La collection automatisée [`postman/search.json`](postman/search.json) valide les 8 scénarios clés :
+La collection automatisée [`postman/search.json`](postman/search.json) valide les 9 scénarios clés :
 1. Recherche simple (1 filtre : `intent`)
 2. Recherche combinée (4 filtres : `intent`, `category`, `sort`, `limit`)
 3. Cas 0 résultat avec validation des suggestions
@@ -144,6 +144,7 @@ La collection automatisée [`postman/search.json`](postman/search.json) valide l
 6. Tri chronologique (`sort=oldest`)
 7. Filtrage géographique avec calcul de `distance_km`
 8. Filtrage par zone (`zone=Food Court`)
+9. Autocomplétion instantanée (`GET /api/posts/search/autocomplete?q=tél`)
 
 ---
 

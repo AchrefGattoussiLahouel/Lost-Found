@@ -11,6 +11,97 @@ servers:
     description: Local development server
 
 paths:
+  /posts/search/autocomplete:
+    get:
+      summary: Real-time search autocomplete
+      description: |
+        Returns fast instant suggestions across post titles, categories, and mall places/zones
+        as the user types.
+      tags:
+        - Search & Exploration
+      parameters:
+        - name: q
+          in: query
+          description: Search prefix or query string.
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example: "tél"
+        - name: intent
+          in: query
+          description: Filter post suggestions by intent.
+          required: false
+          schema:
+            type: string
+            enum: [lost, found]
+          example: "lost"
+        - name: limit
+          in: query
+          description: Maximum number of suggestions per category.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+          example: 5
+      responses:
+        "200":
+          description: Autocomplete suggestions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                  suggestions:
+                    type: object
+                    properties:
+                      posts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            intent:
+                              type: string
+                            category:
+                              type: string
+                            place:
+                              type: string
+                      categories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                      places:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            zone:
+                              type: string
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /posts/search:
     get:
       summary: Search and explore posts
