@@ -2,6 +2,7 @@ import express from "express";
 import errorHandler from "./middlewares/errorHandler.js";
 import authRoutes from "./routes/auth.routes.js";
 import postRoutes from "./routes/post.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
 const app = express();
 
 app.use(express.json({ limit: "10kb" }));
@@ -18,5 +19,7 @@ app.use("/api/post", postRoutes);
 
 // Error handler (must remain last)
 app.use(errorHandler);
+
+app.use("/api/notifications", notificationRoutes);
 
 export default app;

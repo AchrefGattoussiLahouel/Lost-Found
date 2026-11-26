@@ -6,6 +6,7 @@ import { Scorer } from "./matching/Scorer.js";
 import { TierClassifier } from "./matching/TierClassifier.js";
 import { MatchCriteria } from "./matching/MatchCriteria.js";
 import { MatchExplanation } from "./matching/MatchExplanation.js";
+import notificationService from "./notification.service.js";
 
 export class MatchingService {
   constructor({
@@ -44,14 +45,14 @@ export class MatchingService {
     };
 
     if (!post.textEmbedding) {
-      post.textEmbedding = await this.embeddings.embedText(
-        this.embeddings.buildPostText(post),
+      post.textEmbedding = await this.embedder.embedText(
+        this.embedder.buildPostText(post),
       );
     }
 
     const image = post.imagePath ?? post.photos?.[0];
     if (!post.imageEmbedding && image) {
-      post.imageEmbedding = await this.embeddings.embedImage(image);
+      post.imageEmbedding = await this.embedder.embedImage(image);
     }
 
     return post;
@@ -89,6 +90,15 @@ export class MatchingService {
       tier,
       reasons: this.explanation.build(scores, distance),
     });
+
+    if (result.notify) {
+      await notificationService.notifyMatchingFound({
+        recipient: lost.user,
+        matchingId: result.ticket._id,
+        postId: found._id,
+        score: scores.total,
+      });
+    }
 
     return {
       ticketId: result.ticket._id,
