@@ -28,6 +28,16 @@ const searchSchema = Joi.object({
         .max(100)
         .optional(),
 
+    color: Joi.string()
+        .trim()
+        .max(30)
+        .optional(),
+
+    brand: Joi.string()
+        .trim()
+        .max(50)
+        .optional(),
+
     lat: Joi.number()
         .min(-90)
         .max(90)
@@ -79,6 +89,66 @@ const searchSchema = Joi.object({
     .with("lng", "lat")     // lng requires lat
     .with("lat", "lng")     // lat requires lng
     .with("to", "from");    // to requires from
+
+export const autocompleteSchema = Joi.object({
+    q: Joi.string()
+        .trim()
+        .min(1)
+        .max(50)
+        .required(),
+
+    intent: Joi.string()
+        .valid("lost", "found")
+        .optional(),
+
+    limit: Joi.number()
+        .integer()
+        .min(1)
+        .max(10)
+        .default(5)
+        .optional()
+});
+
+export const itinerarySchema = Joi.object({
+    steps: Joi.array()
+        .items(
+            Joi.object({
+                place: Joi.string().trim().min(1).max(100).required(),
+                time: Joi.date().iso().required()
+            })
+        )
+        .min(1)
+        .max(10)
+        .required(),
+
+    category: Joi.string()
+        .trim()
+        .max(50)
+        .optional(),
+
+    q: Joi.string()
+        .trim()
+        .max(200)
+        .allow("")
+        .optional(),
+
+    color: Joi.string()
+        .trim()
+        .max(30)
+        .optional(),
+
+    brand: Joi.string()
+        .trim()
+        .max(50)
+        .optional(),
+
+    limit: Joi.number()
+        .integer()
+        .min(1)
+        .max(50)
+        .default(20)
+        .optional()
+});
 
 export default searchSchema;
 

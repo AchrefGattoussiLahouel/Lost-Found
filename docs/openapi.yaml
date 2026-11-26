@@ -11,6 +11,190 @@ servers:
     description: Local development server
 
 paths:
+  /posts/search/itinerary:
+    post:
+      summary: Search by trajectory / Last plausible position
+      description: |
+        Finds objects found along the user's trajectory after the time they were at each location.
+      tags:
+        - Search & Exploration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - steps
+              properties:
+                steps:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  items:
+                    type: object
+                    required:
+                      - place
+                      - time
+                    properties:
+                      place:
+                        type: string
+                        example: "Food court"
+                      time:
+                        type: string
+                        format: date-time
+                        example: "2026-10-01T12:00:00.000Z"
+                category:
+                  type: string
+                  example: "Sac"
+                q:
+                  type: string
+                  example: "noir"
+                color:
+                  type: string
+                  example: "noir"
+                brand:
+                  type: string
+                  example: "Apple"
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                  default: 20
+      responses:
+        "200":
+          description: Matching posts found along the user's path
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trajectory:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: integer
+                  synonymsUsed:
+                    type: array
+                    items:
+                      type: string
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: "#/components/schemas/Post"
+                        - type: object
+                          properties:
+                            timelineMatch:
+                              type: object
+                              properties:
+                                visitedPlace:
+                                  type: string
+                                userPassageTime:
+                                  type: string
+                                foundAtLocation:
+                                  type: string
+                                zone:
+                                  type: string
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /posts/search/autocomplete:
+    get:
+      summary: Real-time search autocomplete
+      description: |
+        Returns fast instant suggestions across post titles, categories, and mall places/zones
+        as the user types.
+      tags:
+        - Search & Exploration
+      parameters:
+        - name: q
+          in: query
+          description: Search prefix or query string.
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example: "tél"
+        - name: intent
+          in: query
+          description: Filter post suggestions by intent.
+          required: false
+          schema:
+            type: string
+            enum: [lost, found]
+          example: "lost"
+        - name: limit
+          in: query
+          description: Maximum number of suggestions per category.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+          example: 5
+      responses:
+        "200":
+          description: Autocomplete suggestions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: string
+                  suggestions:
+                    type: object
+                    properties:
+                      posts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            title:
+                              type: string
+                            intent:
+                              type: string
+                            category:
+                              type: string
+                            place:
+                              type: string
+                      categories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                      places:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            zone:
+                              type: string
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /posts/search:
     get:
       summary: Search and explore posts
