@@ -5,6 +5,8 @@ import Place from "../models/place.js";
 import Errors from "../errors/index.js";
 import {
   INTENTS,
+  POST_STATUS,
+  CLOSE_REASONS,
   CUSTODY_STATE,
   RETENTION_DAYS,
   DEPOSIT_WINDOW_MINUTES,
@@ -241,6 +243,49 @@ const deleteById = async (actor, id) => {
   await post.save();
 };
 
+const KEPT_CUSTODY_STATES = [
+  CUSTODY_STATE.AT_OFFICE,
+  CUSTODY_STATE.OFFICE_PENDING,
+  CUSTODY_STATE.RETURNED,
+];
+const closeAllByOwner = async (userId) => {
+  const now = new Date();
+
+  const toRemove = {
+    user: userId,
+    isDeleted: { $ne: true },
+    $or: [
+      { intent: INTENTS.LOST },
+      {
+        intent: INTENTS.FOUND,
+        "custody.state": { $nin: KEPT_CUSTODY_STATES },
+      },
+    ],
+  };
+
+  await Post.updateMany(
+    { ...toRemove, status: { $ne: POST_STATUS.CLOSED } },
+    {
+      $set: {
+        status: POST_STATUS.CLOSED,
+        closeReason: CLOSE_REASONS.DELETED_BY_USER,
+        closedAt: now,
+      },
+    },
+  );
+
+  const { modifiedCount } = await Post.updateMany(toRemove, {
+    $set: {
+      isHidden: true,
+      isDeleted: true,
+      deletedAt: now,
+      deletedBy: userId,
+    },
+  });
+
+  return { deleted: modifiedCount };
+};
+
 export default {
   create,
   getById,
@@ -249,4 +294,5 @@ export default {
   update,
   getTrash,
   deleteById,
+  closeAllByOwner,
 };

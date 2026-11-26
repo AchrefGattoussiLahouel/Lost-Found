@@ -1,13 +1,11 @@
 import jwt from "jsonwebtoken";
 import { USER_STATUS } from "../constants/user.js";
 import User from "../models/user.js";
-
 import Errors from "../errors/index.js";
 
-const authenticate = async (req, res, next) => {
+export const authenticate = async (req, res, next) => {
   try {
     const authorization = req.headers.authorization;
-    const status = req.headers.status;
 
     if (!authorization || !authorization.startsWith("Bearer ")) {
       throw new Errors.TokenMissingError();
@@ -19,7 +17,12 @@ const authenticate = async (req, res, next) => {
       throw new Errors.TokenMissingError();
     }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
+      throw new Errors.TokenInvalidError();
+    }
 
     if (!payload.sub) {
       throw new Errors.TokenInvalidError();
@@ -43,7 +46,7 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-const authorize = (...allowedRoles) => {
+export const authorize = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
       return next(new Errors.TokenMissingError());
