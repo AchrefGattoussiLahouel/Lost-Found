@@ -17,7 +17,15 @@ export class EmbeddingService {
 
   async init() {
     env.cacheDir = this.cfg.cacheDir;
-    this.textPipe = await pipeline("feature-extraction", this.cfg.text.id);
+    if (!this.textPipe) {
+      this.textPipe = await pipeline("feature-extraction", this.cfg.text.id);
+    }
+  }
+
+  async initImage() {
+    if (this.imgProcessor && this.imgModel) return;
+
+    env.cacheDir = this.cfg.cacheDir;
     this.imgProcessor = await AutoProcessor.from_pretrained(this.cfg.image.id);
     this.imgModel = await CLIPVisionModelWithProjection.from_pretrained(
       this.cfg.image.id,
@@ -34,10 +42,16 @@ export class EmbeddingService {
   }
 
   async embedImage(filePath) {
-    const inputs = await this.imgProcessor(await RawImage.read(filePath));
-    const { image_embeds } = await this.imgModel(inputs);
-    const v = Array.from(image_embeds.data);
-    const norm = norm2(v);
-    return v.map((x) => x / norm);
+    try {
+      await this.initImage();
+      const inputs = await this.imgProcessor(await RawImage.read(filePath));
+      const { image_embeds } = await this.imgModel(inputs);
+      const v = Array.from(image_embeds.data);
+      const norm = norm2(v);
+      return norm ? v.map((x) => x / norm) : null;
+    } catch (error) {
+      console.warn(`[Matching] visual embedding unavailable: ${error.message}`);
+      return null;
+    }
   }
 }

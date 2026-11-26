@@ -44,14 +44,14 @@ export class MatchingService {
     };
 
     if (!post.textEmbedding) {
-      post.textEmbedding = await this.embeddings.embedText(
-        this.embeddings.buildPostText(post),
+      post.textEmbedding = await this.embedder.embedText(
+        this.embedder.buildPostText(post),
       );
     }
 
     const image = post.imagePath ?? post.photos?.[0];
     if (!post.imageEmbedding && image) {
-      post.imageEmbedding = await this.embeddings.embedImage(image);
+      post.imageEmbedding = await this.embedder.embedImage(image);
     }
 
     return post;
