@@ -2,17 +2,18 @@
  * buildSearchQuery.js
  *
  * Turns validated search params into a Mongo filter object.
- * Resolves references (Category, Place) and keeps the service layer clean.
+ * Resolves references (Category, Place), expands synonyms, and keeps the service layer clean.
  */
 
 import mongoose from "mongoose";
 import Category from "../models/category.js";
 import Place from "../models/place.js";
 import { boundingBox } from "./geo.js";
+import { expandQueryWithSynonyms } from "./synonyms.js";
 
 /**
  * @param {object} filters  Validated query params
- * @returns {Promise<{ query: object, projection: object, needsTextScore: boolean }>}
+ * @returns {Promise<{ query: object, projection: object, needsTextScore: boolean, synonymsAdded: string[] }>}
  */
 export const buildSearchQuery = async (filters) => {
     const {
@@ -21,6 +22,8 @@ export const buildSearchQuery = async (filters) => {
         category,
         zone,
         place,
+        color,
+        brand,
         lat,
         lng,
         radius,
@@ -54,6 +57,15 @@ export const buildSearchQuery = async (filters) => {
             // No matching category found -> force 0 matches
             query.category = new mongoose.Types.ObjectId();
         }
+    }
+
+    // ── Color & Brand (exact or case-insensitive match) ─────────
+    if (color) {
+        query.color = new RegExp(`^${escapeRegex(color)}$`, "i");
+    }
+
+    if (brand) {
+        query.brand = new RegExp(`^${escapeRegex(brand)}$`, "i");
     }
 
     // ── Place / Zone / Coordinates (resolve from Place collection)
@@ -93,17 +105,18 @@ export const buildSearchQuery = async (filters) => {
         }
     }
 
-    // ── Full-text search ────────────────────────────────────────
+    // ── Full-text search with Synonym expansion ─────────────────
     let needsTextScore = false;
+    let synonymsAdded = [];
 
     if (q && q.trim()) {
-        query.$text = { $search: q.trim() };
+        const expansion = expandQueryWithSynonyms(q.trim());
+        query.$text = { $search: expansion.expanded };
         needsTextScore = true;
+        synonymsAdded = expansion.synonymsAdded;
     }
 
     // ── Date range (overlap search) ─────────────────────────────
-    //   The post's window [start, end] overlaps the query [from, to]
-    //   when: post.start <= to  AND  post.end >= from
     if (from) {
         query.end = query.end || {};
         query.end.$gte = new Date(from);
@@ -119,11 +132,11 @@ export const buildSearchQuery = async (filters) => {
         ? { score: { $meta: "textScore" } }
         : {};
 
-    return { query, projection, needsTextScore };
+    return { query, projection, needsTextScore, synonymsAdded };
 };
 
 // Escape special regex chars so user input is safe
-function escapeRegex(str) {
+export function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
