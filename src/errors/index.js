@@ -1,4 +1,4 @@
-import { AppError } from "./AppError.js";
+import AppError from "./AppError.js";
 import ERROR_CODES from "./errorCodes.js";
 
 import {
@@ -24,7 +24,24 @@ import {
   TokenExpiredError,
   InsufficientRoleError,
   AccountNotActiveError,
+  AccountSuspendedError,
 } from "./auth.errors.js";
+
+import {
+  ContactRequiredError,
+  PostNotFoundError,
+  InvalidCategoryError,
+  InvalidPlaceError,
+  InvalidPostStatusError,
+} from "./post.errors.js";
+
+import {
+  ReportNotFoundError,
+  CannotReportOwnPostError,
+  ReportAlreadyClosedError,
+  ReportAlreadyExistsError,
+  ReportStatusInvalidError,
+} from "./report.errors.js";
 
 export default {
   AppError,
@@ -48,4 +65,15 @@ export default {
   TokenExpiredError,
   InsufficientRoleError,
   AccountNotActiveError,
+  AccountSuspendedError,
+  ContactRequiredError,
+  PostNotFoundError,
+  InvalidCategoryError,
+  InvalidPlaceError,
+  InvalidPostStatusError,
+  ReportNotFoundError,
+  CannotReportOwnPostError,
+  ReportAlreadyClosedError,
+  ReportStatusInvalidError,
+  ReportAlreadyExistsError,
 };
