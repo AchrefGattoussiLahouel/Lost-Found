@@ -34,10 +34,13 @@ export const authenticate = async (req, res, next) => {
       throw new Errors.TokenInvalidError();
     }
 
+    if (user.status === USER_STATUS.SUSPENDED) {
+      throw new Errors.AccountSuspendedError();
+    }
+
     if (user.status !== USER_STATUS.ACTIVE) {
       throw new Errors.AccountNotActiveError();
     }
-
     req.user = user;
 
     next();

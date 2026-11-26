@@ -276,7 +276,64 @@ const deletePersonnel = async (personnelId, adminId) => {
         message: "Personnel account deleted successfully.",
     };
 };
+const banUser = async (targetId, actor, reason) => {
+    if (targetId.toString() === actor._id.toString()) {
+        throw new Errors.BadRequestError("You cannot ban yourself.");
+    }
 
+    const target = await User.findById(targetId);
+
+    if (!target || target.status === USER_STATUS.DELETED) {
+        throw new Errors.NotFoundError();
+    }
+
+    // Admins can never be banned; only admins can ban personnel.
+    if (
+        target.role === USER_ROLES.ADMIN ||
+        (target.role === USER_ROLES.PERSONNEL && actor.role !== USER_ROLES.ADMIN)
+    ) {
+        throw new Errors.AuthorizationError();
+    }
+
+    if (target.status === USER_STATUS.SUSPENDED) {
+        throw new Errors.ConflictError("User is already banned.");
+    }
+
+    // Only active accounts can be banned, so unban can safely restore ACTIVE.
+    if (target.status !== USER_STATUS.ACTIVE) {
+        throw new Errors.BadRequestError("Only active accounts can be banned.");
+    }
+
+    target.status = USER_STATUS.BANNED;
+    target.bannedAt = new Date();
+    target.bannedBy = actor._id;
+    target.banReason = reason ?? null;
+
+    await target.save();
+
+    return sanitizeUser(target);
+};
+
+const unbanUser = async (targetId) => {
+    const target = await User.findById(targetId);
+
+    if (!target || target.status === USER_STATUS.DELETED) {
+        throw new Errors.NotFoundError();
+    }
+
+    if (target.status !== USER_STATUS.SUSPENDED) {
+        throw new Errors.ConflictError("User is not banned.");
+    }
+
+    target.status = USER_STATUS.ACTIVE;
+    target.bannedAt = null;
+    target.bannedBy = null;
+    target.banReason = null;
+
+    await target.save();
+
+    return sanitizeUser(target);
+};
 export default {
     register,
     login,
@@ -286,4 +343,6 @@ export default {
     createPersonnel,
     updatePersonnel,
     deletePersonnel,
+    banUser,
+    unbanUser,
 };

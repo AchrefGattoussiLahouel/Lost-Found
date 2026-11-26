@@ -33,3 +33,6 @@ export const updatePersonnelSchema = Joi.object({
 export const userIdSchema = Joi.object({
     id: Joi.string().hex().length(24).required(),
 });
+export const banUserSchema = Joi.object({
+    reason: Joi.string().trim().max(500).allow(""),
+});
