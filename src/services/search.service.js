@@ -6,6 +6,8 @@
  */
 
 import Post from "../models/post.js";
+import Category from "../models/category.js";
+import Place from "../models/place.js";
 import { buildSearchQuery } from "../utils/buildSearchQuery.js";
 import { paginationParams, paginationMeta } from "../utils/pagination.js";
 import { haversineKm } from "../utils/geo.js";
@@ -101,4 +103,72 @@ function buildSuggestions(params) {
     return tips;
 }
 
-export default { searchPosts };
+function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Autocomplete suggestions for real-time search typing.
+ * Searches across active posts titles, categories and places.
+ *
+ * @param {{ q: string, limit?: number, intent?: string }} params
+ * @returns {Promise<{ query: string, suggestions: { posts: object[], categories: object[], places: object[] } }>}
+ */
+export const autocompletePosts = async ({ q, limit = 5, intent }) => {
+    const escaped = escapeRegex(q);
+    const regex = new RegExp(escaped, "i");
+
+    const postFilter = {
+        title: regex,
+        status: "active",
+        isHidden: { $ne: true }
+    };
+
+    if (intent) {
+        postFilter.intent = intent;
+    }
+
+    const [posts, categories, places] = await Promise.all([
+        Post.find(postFilter)
+            .select("_id title intent category place")
+            .populate("category", "name")
+            .populate("place", "name zone")
+            .limit(limit)
+            .lean(),
+        Category.find({ name: regex, isActive: { $ne: false } })
+            .select("_id name")
+            .limit(limit)
+            .lean(),
+        Place.find({
+            $or: [{ name: regex }, { zone: regex }],
+            isActive: { $ne: false }
+        })
+            .select("_id name zone")
+            .limit(limit)
+            .lean()
+    ]);
+
+    return {
+        query: q,
+        suggestions: {
+            posts: posts.map((p) => ({
+                id: p._id,
+                title: p.title,
+                intent: p.intent,
+                category: p.category?.name || null,
+                place: p.place?.name || null
+            })),
+            categories: categories.map((c) => ({
+                id: c._id,
+                name: c.name
+            })),
+            places: places.map((p) => ({
+                id: p._id,
+                name: p.name,
+                zone: p.zone
+            }))
+        }
+    };
+};
+
+export default { searchPosts, autocompletePosts };
