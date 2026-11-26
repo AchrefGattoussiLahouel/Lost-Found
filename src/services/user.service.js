@@ -2,10 +2,14 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 
 import User from "../models/user.js";
-import ROLES from "../constants/roles.js";
-import { STATUS } from "../constants/status.js";
+import { USER_ROLES, USER_STATUS } from "../constants/user.js";
 import generateToken from "../utils/jwt.js";
 import Errors from "../errors/index.js";
+import postService from "./post.service.js";
+
+const BCRYPT_ROUNDS = 12;
+
+const normalizeEmail = (email = "") => email.trim().toLowerCase();
 
 const sanitizeUser = (user) => {
     const userObject = user.toObject
@@ -23,24 +27,26 @@ const sanitizeUser = (user) => {
 // ============================================
 
 const register = async (userData) => {
+    const normalizedEmail = normalizeEmail(userData.email);
+
     const existingUser = await User.exists({
-        email: userData.email,
+        email: normalizedEmail,
     });
 
     if (existingUser) {
         throw new Errors.EmailAlreadyExistsError();
     }
 
-    const hashedPassword = await bcrypt.hash(userData.password, 12);
+    const hashedPassword = await bcrypt.hash(userData.password, BCRYPT_ROUNDS);
 
     const user = await User.create({
         firstName: userData.firstName,
         lastName: userData.lastName,
-        email: userData.email,
+        email: normalizedEmail,
         password: hashedPassword,
         phone: userData.phone || null,
-        role: ROLES.MEMBRE,
-        status: STATUS.PENDING,
+        role: USER_ROLES.MEMBRE,
+        status: USER_STATUS.PENDING,
     });
 
     const token = generateToken(user._id);
@@ -53,7 +59,8 @@ const register = async (userData) => {
 };
 
 const login = async ({ email, password }) => {
-    const user = await User.findOne({ email }).select("+password");
+    const normalizedEmail = normalizeEmail(email);
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
 
     if (!user) {
         throw new Errors.InvalidCredentialsError();
@@ -65,7 +72,11 @@ const login = async ({ email, password }) => {
         throw new Errors.InvalidCredentialsError();
     }
 
-    if (user.status !== STATUS.ACTIVE) {
+    if (user.status === USER_STATUS.SUSPENDED) {
+        throw new Errors.AccountSuspendedError();
+    }
+
+    if (user.status !== USER_STATUS.ACTIVE) {
         throw new Errors.AccountNotActiveError();
     }
 
@@ -85,7 +96,7 @@ const login = async ({ email, password }) => {
 const changePassword = async (userId, currentPassword, newPassword) => {
     const user = await User.findById(userId).select("+password");
 
-    if (!user || user.status !== STATUS.ACTIVE) {
+    if (!user || user.status !== USER_STATUS.ACTIVE) {
         throw new Errors.NotFoundError();
     }
 
@@ -98,7 +109,7 @@ const changePassword = async (userId, currentPassword, newPassword) => {
         throw new Errors.InvalidCredentialsError();
     }
 
-    user.password = await bcrypt.hash(newPassword, 12);
+    user.password = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
 
     await user.save();
 
@@ -113,28 +124,20 @@ const anonymizeUser = async (user) => {
     user.lastName = "User";
     user.email = `deleted_${user._id}_${crypto.randomUUID()}@deleted.invalid`;
     user.phone = null;
-    user.password = await bcrypt.hash(crypto.randomUUID(), 12);
-    user.status = STATUS.DELETED;
+    user.password = await bcrypt.hash(crypto.randomUUID(), BCRYPT_ROUNDS);
+    user.status = USER_STATUS.DELETED;
 
     await user.save();
 };
 
-// Delete authenticated user's account
 const deleteAccount = async (userId) => {
     const user = await User.findById(userId);
 
-    if (!user || user.status === STATUS.DELETED) {
+    if (!user || user.status === USER_STATUS.DELETED) {
         throw new Errors.NotFoundError();
     }
 
-    /*
-     * TODO: Integrate with B's declaration service.
-     *
-     * await declarationService.closeAllByOwner(userId);
-     *
-     * Close declarations successfully before anonymizing the user.
-     */
-
+    await postService.closeAllByOwner(userId);
     await anonymizeUser(user);
 
     return {
@@ -147,12 +150,14 @@ const deleteAccount = async (userId) => {
 // ============================================
 
 // Get personnel with pagination
-const getPersonnel = async (page, limit) => {
-    const skip = (page - 1) * limit;
+const getPersonnel = async (page = 1, limit = 10) => {
+    const safePage = Math.max(1, Number(page) || 1);
+    const safeLimit = Math.max(1, Number(limit) || 10);
+    const skip = (safePage - 1) * safeLimit;
 
     const filter = {
-        role: ROLES.PERSONNEL,
-        status: STATUS.ACTIVE,
+        role: USER_ROLES.PERSONNEL,
+        status: USER_STATUS.ACTIVE,
     };
 
     const [personnel, total] = await Promise.all([
@@ -160,7 +165,7 @@ const getPersonnel = async (page, limit) => {
             .select("-password")
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(limit)
+            .limit(safeLimit)
             .lean(),
 
         User.countDocuments(filter),
@@ -170,33 +175,35 @@ const getPersonnel = async (page, limit) => {
         data: personnel,
         pagination: {
             total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
+            page: safePage,
+            limit: safeLimit,
+            totalPages: Math.ceil(total / safeLimit),
         },
     };
 };
 
 // Create personnel account
 const createPersonnel = async (userData) => {
+    const normalizedEmail = normalizeEmail(userData.email);
+
     const existingUser = await User.exists({
-        email: userData.email,
+        email: normalizedEmail,
     });
 
     if (existingUser) {
         throw new Errors.EmailAlreadyExistsError();
     }
 
-    const hashedPassword = await bcrypt.hash(userData.password, 12);
+    const hashedPassword = await bcrypt.hash(userData.password, BCRYPT_ROUNDS);
 
     const personnel = await User.create({
         firstName: userData.firstName,
         lastName: userData.lastName,
-        email: userData.email,
+        email: normalizedEmail,
         password: hashedPassword,
         phone: userData.phone || null,
-        role: ROLES.PERSONNEL,
-        status: STATUS.ACTIVE,
+        role: USER_ROLES.PERSONNEL,
+        status: USER_STATUS.ACTIVE,
     });
 
     return sanitizeUser(personnel);
@@ -212,15 +219,33 @@ const updatePersonnel = async (personnelId, adminId, userData) => {
 
     const personnel = await User.findOne({
         _id: personnelId,
-        role: ROLES.PERSONNEL,
-        status: STATUS.ACTIVE,
+        role: USER_ROLES.PERSONNEL,
+        status: USER_STATUS.ACTIVE,
     });
 
     if (!personnel) {
         throw new Errors.NotFoundError();
     }
 
-    Object.assign(personnel, userData);
+    if (userData.firstName !== undefined) personnel.firstName = userData.firstName;
+    if (userData.lastName !== undefined) personnel.lastName = userData.lastName;
+    if (userData.phone !== undefined) personnel.phone = userData.phone || null;
+    if (userData.email !== undefined) {
+        const normalizedEmail = normalizeEmail(userData.email);
+        if (normalizedEmail !== personnel.email) {
+            const emailTaken = await User.exists({
+                email: normalizedEmail,
+                _id: { $ne: personnel._id },
+            });
+            if (emailTaken) {
+                throw new Errors.EmailAlreadyExistsError();
+            }
+            personnel.email = normalizedEmail;
+        }
+    }
+    if (userData.password) {
+        personnel.password = await bcrypt.hash(userData.password, BCRYPT_ROUNDS);
+    }
 
     await personnel.save();
 
@@ -237,8 +262,8 @@ const deletePersonnel = async (personnelId, adminId) => {
 
     const personnel = await User.findOne({
         _id: personnelId,
-        role: ROLES.PERSONNEL,
-        status: STATUS.ACTIVE,
+        role: USER_ROLES.PERSONNEL,
+        status: USER_STATUS.ACTIVE,
     });
 
     if (!personnel) {

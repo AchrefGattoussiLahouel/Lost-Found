@@ -61,10 +61,10 @@ const normalizeError = (err) => {
   return new Errors.InternalError(err);
 };
 
-const errorHandler = (err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
+export const errorHandler = (err, req, res, next) => {
+    if (res.headersSent) {
+        return next(err);
+    }
 
   const error = err instanceof Errors.AppError ? err : normalizeError(err);
 

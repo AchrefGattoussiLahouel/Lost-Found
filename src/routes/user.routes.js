@@ -17,11 +17,12 @@ import {
     userIdSchema,
 } from "../validators/user.validator.js";
 
-import ROLES from "../constants/roles.js";
+import { USER_ROLES } from "../constants/user.js";
 
 const router = express.Router();
 
 router.use(authenticate);
+
 router.patch(
     "/me/password",
     validate(changePasswordSchema),
@@ -35,21 +36,21 @@ router.delete(
 
 router.get(
     "/personnel",
-    authorize(ROLES.ADMIN),
+    authorize(USER_ROLES.ADMIN),
     validate(personnelListSchema, "query"),
     userController.getPersonnel
 );
 
 router.post(
     "/personnel",
-    authorize(ROLES.ADMIN),
+    authorize(USER_ROLES.ADMIN),
     validate(createPersonnelSchema),
     userController.createPersonnel
 );
 
 router.patch(
     "/personnel/:id",
-    authorize(ROLES.ADMIN),
+    authorize(USER_ROLES.ADMIN),
     validate(userIdSchema, "params"),
     validate(updatePersonnelSchema),
     userController.updatePersonnel
@@ -57,7 +58,7 @@ router.patch(
 
 router.delete(
     "/personnel/:id",
-    authorize(ROLES.ADMIN),
+    authorize(USER_ROLES.ADMIN),
     validate(userIdSchema, "params"),
     userController.deletePersonnel
 );

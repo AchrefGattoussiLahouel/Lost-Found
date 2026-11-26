@@ -1,6 +1,6 @@
-import { STATUS } from "../constants/status.js";
+import { USER_STATUS } from "../constants/user.js";
 import mongoose from "mongoose";
-import ROLES from "../constants/roles.js";
+import { USER_ROLES } from "../constants/user.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -38,17 +38,16 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: Object.values(ROLES),
-      default: ROLES.MEMBRE,
+      enum: Object.values(USER_ROLES),
+      default: USER_ROLES.MEMBRE,
       required: true,
     },
     status: {
       type: String,
-      enum: Object.values(STATUS),
-      default: STATUS.PENDING,
+      enum: Object.values(USER_STATUS),
+      default: USER_STATUS.PENDING,
       required: true,
     },
-    
   },
   {
     timestamps: true,
@@ -59,3 +58,4 @@ const userSchema = new mongoose.Schema(
 const User = mongoose.model("User", userSchema);
 
 export default User;
+export { User };

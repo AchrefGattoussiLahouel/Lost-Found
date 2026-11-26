@@ -1,5 +1,4 @@
-
-const ERROR_CODES = Object.freeze({
+export const ERROR_CODES = Object.freeze({
     BAD_REQUEST: {
         status: 400,
         messageKey: "errors.badRequest"
