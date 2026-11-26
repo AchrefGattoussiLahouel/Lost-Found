@@ -11,6 +11,99 @@ servers:
     description: Local development server
 
 paths:
+  /posts/search/itinerary:
+    post:
+      summary: Search by trajectory / Last plausible position
+      description: |
+        Finds objects found along the user's trajectory after the time they were at each location.
+      tags:
+        - Search & Exploration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - steps
+              properties:
+                steps:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  items:
+                    type: object
+                    required:
+                      - place
+                      - time
+                    properties:
+                      place:
+                        type: string
+                        example: "Food court"
+                      time:
+                        type: string
+                        format: date-time
+                        example: "2026-10-01T12:00:00.000Z"
+                category:
+                  type: string
+                  example: "Sac"
+                q:
+                  type: string
+                  example: "noir"
+                color:
+                  type: string
+                  example: "noir"
+                brand:
+                  type: string
+                  example: "Apple"
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 50
+                  default: 20
+      responses:
+        "200":
+          description: Matching posts found along the user's path
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trajectory:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: integer
+                  synonymsUsed:
+                    type: array
+                    items:
+                      type: string
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: "#/components/schemas/Post"
+                        - type: object
+                          properties:
+                            timelineMatch:
+                              type: object
+                              properties:
+                                visitedPlace:
+                                  type: string
+                                userPassageTime:
+                                  type: string
+                                foundAtLocation:
+                                  type: string
+                                zone:
+                                  type: string
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /posts/search/autocomplete:
     get:
       summary: Real-time search autocomplete

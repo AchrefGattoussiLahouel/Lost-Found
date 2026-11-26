@@ -4,7 +4,7 @@
  * Thin layer: req → service → res
  */
 
-import { searchPosts, autocompletePosts } from "../services/search.service.js";
+import { searchPosts, autocompletePosts, searchByItinerary } from "../services/search.service.js";
 
 export const search = async (req, res, next) => {
     try {
@@ -26,5 +26,15 @@ export const autocomplete = async (req, res, next) => {
     }
 };
 
-export default { search, autocomplete };
+export const searchItinerary = async (req, res, next) => {
+    try {
+        const result = await searchByItinerary(req.validated.body);
+
+        return res.status(200).json(result);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export default { search, autocomplete, searchItinerary };
 
