@@ -58,9 +58,14 @@ const listQuerySchema = Joi.object({
   status: Joi.string().valid(...Object.values(POST_STATUS)),
 });
 
+const receiveSchema = Joi.object({
+  storageSpot: Joi.string().trim().min(1).max(100).required(),
+});
+
 export default {
   createPost,
   idParam,
   listQuerySchema,
   updateSchema,
+  receiveSchema,
 };

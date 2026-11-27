@@ -16,17 +16,12 @@ app.get("/", (req, res) => {
   });
 });
 
-// Authentication routes
 app.use("/api/auth", authRoutes);
 app.use("/api/post", postRoutes);
 app.use("/api/report", reportRoutes);
 app.use("/api/moderation", moderationRoutes);
-
-// Error handler (must remain last)
-// ── Routes ──────────────────────────────────────────────────────
 app.use("/api/posts/search", searchRoutes);
 
-// ── Error handler (must be last) ────────────────────────────────
 app.use(errorHandler);
 
 export default app;

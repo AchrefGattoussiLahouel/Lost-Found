@@ -7,16 +7,18 @@ import {
   INTENTS,
   CUSTODY_STATE,
   RETENTION_DAYS,
+  POST_STATUS,
+  EVENTS,
   DEPOSIT_WINDOW_MINUTES,
 } from "../constants/post.js";
-import { isStaff, canView, present } from "../rules/post.rules.js";
+import { isStaff, canView, present ,isOwner} from "../rules/post.rules.js";
 import { getSkip, paginationMeta } from "../utils/pagination.js";
 
 const MINUTE = 60 * 1000;
 const DAY = 24 * 60 * MINUTE;
 
 const generateReferenceCode = () =>
-  "LF-" + crypto.randomBytes(4).toString("hex").toUpperCase();
+  "LF-" + crypto.randomBytes(6).toString("hex").toUpperCase();
 
 const populate = (query) =>
   query
@@ -240,6 +242,62 @@ const deleteById = async (actor, id) => {
 
   await post.save();
 };
+
+
+//Deposit a found post to the office
+const declareDeposit = async (id, actor) => {
+  const post = await Post.findById(id);
+  if (!post) throw new Errors.PostNotFoundError();
+  if (!isOwner(actor, post)) throw new Errors.NotOwnerError();
+  if (post.intent !== INTENTS.FOUND) throw new Errors.NotAFoundObjectError();
+  if (post.status === POST_STATUS.CLOSED || post.isHidden) {
+    throw new Errors.PostNotEditableError(post.isHidden ? "hidden" : "closed", post.closeReason);
+  }
+  if (![CUSTODY_STATE.WITH_FINDER, CUSTODY_STATE.DEPOSIT_REQUIRED].includes(post.custody?.state)) {
+    throw new Errors.InvalidCustodyStateError(post.custody?.state);
+  }
+
+  // Condition sur l'état lu : si un job ou le staff a changé l'état entre-temps, on refuse
+  const updated = await Post.findOneAndUpdate(
+    { _id: id, "custody.state": post.custody.state },
+    { "custody.state": CUSTODY_STATE.OFFICE_PENDING, "custody.depositedAt": new Date(), "custody.isOverdue": false },
+    { new: true },
+  );
+  if (!updated) throw new Errors.InvalidCustodyStateError("concurrent_change");
+
+  events.emit(EVENTS.DEPOSIT_DECLARED, { postId: updated._id });
+  return getById(id, actor);
+};
+// Mark a found post as received at the office
+const receiveAtOffice = async (id, { storageSpot }, staff) => {
+  const post = await Post.findById(id);
+  if (!post) throw new Errors.PostNotFoundError();
+  if (post.intent !== INTENTS.FOUND) throw new Errors.NotAFoundObjectError();
+  if (post.status === POST_STATUS.CLOSED) throw new Errors.PostNotEditableError("closed", post.closeReason);
+  if (![CUSTODY_STATE.WITH_FINDER, CUSTODY_STATE.DEPOSIT_REQUIRED, CUSTODY_STATE.OFFICE_PENDING].includes(post.custody?.state)) {
+    throw new Errors.InvalidCustodyStateError(post.custody?.state);
+  }
+
+  const updated = await Post.findOneAndUpdate(
+    { _id: id, "custody.state": post.custody.state },
+    {
+      "custody.state": CUSTODY_STATE.AT_OFFICE,
+      "custody.receivedBy": staff._id,
+      "custody.receivedAt": new Date(),
+      "custody.storageSpot": storageSpot,
+      "custody.isOverdue": false,
+    },
+    { new: true },
+  );
+  if (!updated) throw new Errors.InvalidCustodyStateError("concurrent_change");
+
+  events.emit(EVENTS.RECEIVED_AT_OFFICE, { postId: updated._id, userId: updated.user });
+  return getById(id, staff);
+};
+
+
+
+
 
 export default {
   create,

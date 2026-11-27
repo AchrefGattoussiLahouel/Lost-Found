@@ -30,4 +30,14 @@ export const DEPOSIT_REASONS = Object.freeze({
 });
 
 export const RETENTION_DAYS = 30; // time to keep a post before it is automatically closed
-export const DEPOSIT_WINDOW_MINUTES = 60; // time to return the item to the office after a post of found is made
+export const DEPOSIT_WINDOW_MINUTES = 1; // time to return the item to the office after a post of found is made
+
+
+export const JOB_INTERVAL_MS = 60 * 1000;   // les jobs tournent chaque minute
+
+export const EVENTS = Object.freeze({
+  DEPOSIT_REQUIRED: "post.deposit_required",
+  DEPOSIT_DECLARED: "post.deposit_declared",
+  RECEIVED_AT_OFFICE: "post.received_at_office",
+  OVERDUE: "post.overdue",
+});

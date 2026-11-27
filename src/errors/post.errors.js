@@ -51,8 +51,30 @@ class InvalidPostStatusError extends AppError {
     });
   }
 }
+export class InvalidCustodyStateError extends AppError {
+  constructor(current) {
+    super({
+      status: 409,
+      code: "INVALID_CUSTODY_STATE",
+      message: "This action is not allowed in the current custody state.",
+      details: { current },
+    });
+  }
+}
+
+export class NotAFoundObjectError extends AppError {
+  constructor() {
+    super({
+      status: 409,
+      code: "NOT_A_FOUND_OBJECT",
+      message: "This action only applies to found objects.",
+    });
+  }
+}
 
 export {
+  InvalidCustodyStateError,
+  NotAFoundObjectError,
   PostNotFoundError,
   InvalidCategoryError,
   InvalidPlaceError,

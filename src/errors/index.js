@@ -33,6 +33,8 @@ import {
   InvalidCategoryError,
   InvalidPlaceError,
   InvalidPostStatusError,
+  InvalidCustodyStateError,
+  NotAFoundObjectError,
 } from "./post.errors.js";
 
 import {
@@ -76,4 +78,6 @@ export default {
   ReportAlreadyClosedError,
   ReportStatusInvalidError,
   ReportAlreadyExistsError,
+  InvalidCustodyStateError,
+  NotAFoundObjectError,
 };
