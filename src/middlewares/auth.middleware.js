@@ -63,7 +63,36 @@ export const authorize = (...allowedRoles) => {
   };
 };
 
+/**
+ * Optional authentication — does NOT block the request if no token is provided.
+ * Sets req.user if a valid token is present, leaves it undefined otherwise.
+ */
+export const optionalAuth = async (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return next(); // no token → continue as guest
+  }
+
+  const token = authorization.split(" ")[1];
+  if (!token) return next();
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (payload?.sub) {
+      const user = await User.findById(payload.sub);
+      if (user && user.status === USER_STATUS.ACTIVE) {
+        req.user = user;
+      }
+    }
+  } catch {
+    // invalid/expired token → silently ignore, continue as guest
+  }
+
+  next();
+};
+
 export default {
   authenticate,
   authorize,
+  optionalAuth,
 };
