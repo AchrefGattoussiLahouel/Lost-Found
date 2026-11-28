@@ -271,6 +271,7 @@ const declareDeposit = async (id, actor) => {
 // Mark a found post as received at the office
 const receiveAtOffice = async (id, { storageSpot }, staff) => {
   const post = await Post.findById(id);
+  if (!isStaff(staff)) throw new Errors.AuthorizationError();
   if (!post) throw new Errors.PostNotFoundError();
   if (post.intent !== INTENTS.FOUND) throw new Errors.NotAFoundObjectError();
   if (post.status === POST_STATUS.CLOSED) throw new Errors.PostNotEditableError("closed", post.closeReason);
@@ -295,6 +296,33 @@ const receiveAtOffice = async (id, { storageSpot }, staff) => {
   return getById(id, staff);
 };
 
+const requireDepositForUnmatched = async () => {
+  const now = new Date();
+  const filter = {
+    intent: INTENTS.FOUND,
+    status: POST_STATUS.ACTIVE,
+    activeMatch: null,                      // aucun match en cours
+    "custody.state": CUSTODY_STATE.WITH_FINDER,
+    "custody.depositDeadline": { $lt: now },
+  };
+  const posts = await Post.find(filter).select("_id user");
+  if (!posts.length) return 0;
+
+  await Post.updateMany(
+    { _id: { $in: posts.map((p) => p._id) }, ...filter },   // refiltre : évite d'écraser un changement récent
+    {
+      "custody.state": CUSTODY_STATE.DEPOSIT_REQUIRED,
+      "custody.depositReason": DEPOSIT_REASON.DEADLINE_PASSED,
+      "custody.depositRequiredAt": now,
+      "custody.depositDeadline": new Date(now.getTime() + DEPOSIT_WINDOW_MINUTES * MINUTE),
+    },
+  );
+  for (const p of posts) {
+    events.emit(EVENTS.DEPOSIT_REQUIRED, { postId: p._id, userId: p.user, reason: DEPOSIT_REASON.DEADLINE_PASSED });
+  }
+  return posts.length;
+};
+
 
 
 
@@ -307,4 +335,6 @@ export default {
   update,
   getTrash,
   deleteById,
+  declareDeposit,
+  receiveAtOffice,
 };

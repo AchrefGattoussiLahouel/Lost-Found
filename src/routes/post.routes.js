@@ -40,4 +40,18 @@ router.delete(
   postController.deleteById,
 );
 
+router.post(
+  "/:id/deposit",
+  validate(Schema.idParam, "params"),
+  postController.declareDeposit,
+);
+
+router.post(
+  "/:id/receive",
+  Authmiddleware.authorize(USER_ROLES.ADMIN, USER_ROLES.PERSONNEL),
+  validate(Schema.idParam, "params"),
+  validate(Schema.receiveAtOfficeSchema, "body"),
+  postController.receiveAtOffice,
+);
+
 export default router;
